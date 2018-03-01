@@ -1,0 +1,3 @@
+bin  xrange       test        total_bkg   data  data/bkg
+1    [0.00,1.00]  0.00+-0.00  0.00+-0.00  0     -nan+--nan
+                  0.00+-0.00  0.00+-0.00  0     -nan+--nan
