@@ -5,9 +5,10 @@ ROOT.gStyle.SetOptStat(0);
 ROOT.gStyle.SetOptTitle(0);
 
 def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
-    print(file_name, var_name, str_condition, bin_num, xmin, xmax)
+    #print(file_name, var_name, str_condition, bin_num, xmin, xmax)
     f = ROOT.TFile(file_name)
     t = f.Get("t")
+    
     myhist = ROOT.TH1F("myhist","myhist",bin_num,xmin,xmax);
     t.Draw(var_name+">>myhist",str_condition,"goff")
     print(myhist.Integral())
@@ -32,13 +33,13 @@ from create_file_list import get_files
 MC_list = get_files()
 hist_list = []
 name_list = []
-for MC in MC_list[0:2]:
+for MC in MC_list[5:8]:
     MC_name = MC["name"]
     file_name_list = MC["file_name_list"]
     
-    sum_hist = ROOT.TH1F("sum_hist","sum_hist",bin_num,xmin,xmax)
+    sum_hist = ROOT.TH1F("sum_hist"+str(len(name_list)),"sum_hist",bin_num,xmin,xmax)
     #sum_hist.SetDirectory(0);  
-    ROOT.TH1.AddDirectory(ROOT.kFALSE);
+    #ROOT.TH1.AddDirectory(ROOT.kFALSE);
     sum_dict = {}
     for file_name in file_name_list:
         hist = draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax)
@@ -61,7 +62,7 @@ d_opts = {
         "energy ": 13,
         "outputName": "plots/test.pdf",
         "yTitleOffset": 0.0,
-        "xAxisLabel": "pT_{bb}",
+        "xAxisLabel": "m_{bb}",
         "yAxisLabel": "Events",
         "xAxisUnit": "GeV",
         "noFill": "GeV",
