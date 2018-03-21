@@ -18,7 +18,10 @@ def get_cutflow(file_name,  condition_list):
         for j in range(i):
             str_condition += "&&"
             str_condition += condition_list[j]
-        str_condition = "("+str_condition+")*scale1fb*"+str(lumi)
+        if "TChiWH" in file_name:
+            str_condition = "("+str_condition+")*weight_PU*weight_lepSF*weight_btagsf*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(t.GetEntries())
+        else:
+            str_condition = "("+str_condition+")*weight_PU*weight_lepSF*weight_btagsf*scale1fb*"+str(lumi)
         myhist_name = "myhist"+str(i)
         myhist = ROOT.TH1F(myhist_name,myhist_name,bin_num,xmin,xmax);
         t.Draw(var_name+">>"+myhist_name,str_condition,"goff")
@@ -33,21 +36,26 @@ def get_cutflow(file_name,  condition_list):
     return cutflow_dict
 
 #Basic Set-up
-condition_list = ["ngoodleps == 1", "nvetoleps == 1", "PassTrackVeto == 1", "PassTauVeto == 1", "ngoodjets == 2", "ngoodbtags ==2", "mct >= 170", "pfmet >= 125", "mt_met_lep >= 150"]
-
+#condition_list = ["ngoodleps == 1", "nvetoleps == 1", "PassTrackVeto == 1", "PassTauVeto == 1", "ngoodjets == 2", "ngoodbtags ==2", "mct >= 170", "pfmet >= 125", "mt_met_lep >= 150"]
+from selection_criteria import get_cut_dict
+cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
+condition_list = [cut_dict[item] for item in current_cut_list]
+print(condition_list)
 #Main function
 from create_file_list import get_files
 MC_list = get_files()
+new_location = "../root_file_temp/Sicong_20180228/"
 
 summary_cutflow_dict = {}
 hist_list = []
 name_list = []
-for MC in MC_list:
+for MC in MC_list[0:7]:
     MC_name = MC["name"]
     file_name_list = MC["file_name_list"]
     
     sum_dict = {}
     for file_name in file_name_list:
+        file_name = new_location + file_name[file_name.rfind("/")+1:]
         print(file_name)
         cutflow_dict = get_cutflow(file_name,  condition_list)      
         for key, value in cutflow_dict.items():
