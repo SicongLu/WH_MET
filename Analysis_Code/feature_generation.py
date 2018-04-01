@@ -102,23 +102,38 @@ def feature_generate(file_name, file_name_out):
                 else:
                     di_bjet = di_bjet + t.ak4pfjets_p4.at(i_jet)
         #New MET
-        new_met[0] = 1/2.*(t.pfmet+t.genmet)
-        pfmet_vec = ROOT.TVector3()
-        pfmet_vec.SetPtEtaPhi(t.pfmet, 0, t.pfmet_phi)
-        genmet_vec = ROOT.TVector3()
-        genmet_vec.SetPtEtaPhi(t.genmet, 0, t.genmet_phi)
+        if "TChiWH_" in file_name:
+            new_met[0] = 1/2.*(t.pfmet+t.genmet) #For fastsim, it is recommended to use the new met.
+            pfmet_vec = ROOT.TVector3()
+            pfmet_vec.SetPtEtaPhi(t.pfmet, 0, t.pfmet_phi)
+            genmet_vec = ROOT.TVector3()
+            genmet_vec.SetPtEtaPhi(t.genmet, 0, t.genmet_phi)
+            
+            new_met_vec = 1/2.*(pfmet_vec+genmet_vec)
+            new_met[0] = new_met_vec.Pt()
+            new_met_phi[0]  = new_met_vec.Phi()
+            
+            mt_dphi = t.lep1_p4.Phi() -new_met_phi[0]
+            if mt_dphi>math.pi: mt_dphi = 2*math.pi - mt_dphi 
+            
+            new_mt[0] = 2*math.sqrt(t.lep1_p4.Pt()*new_met[0])*abs(math.sin(mt_dphi/2.))
+        else:
+            new_met[0] = t.pfmet
+            new_mt[0] = t.mt_met_lep
         
-        new_met_vec = 1/2.*(pfmet_vec+genmet_vec)
-        new_met[0] = new_met_vec.Pt()
-        new_met_phi[0]  = new_met_vec.Phi()
-        
-        mt_dphi = t.lep1_p4.Phi() -new_met_phi[0]
-        if mt_dphi>math.pi: mt_dphi = 2*math.pi - mt_dphi 
-        
-        new_mt[0] = 2*math.sqrt(t.lep1_p4.Pt()*new_met[0])*abs(math.sin(mt_dphi/2.))
         if len(bjet_index)<2:
-            new_mct[0] = -999
-            new_mbb[0] = -999
+            if len(t.ak4pfjets_p4)<2:
+                new_mct[0] = -999
+                new_mbb[0] = -999
+            else:
+                ptb1 = t.ak4pfjets_p4.at(0).Pt()
+                ptb2 = t.ak4pfjets_p4.at(1).Pt()
+                phib1 = t.ak4pfjets_p4.at(0).Phi()
+                phib2 = t.ak4pfjets_p4.at(1).Phi()
+                dphibb = abs(phib1-phib2)
+                if dphibb>math.pi: dphibb = 2*math.pi-dphibb
+                new_mct[0] = math.sqrt(2*ptb1*ptb2*(1+math.cos(dphibb)))
+                new_mbb[0] = (t.ak4pfjets_p4.at(0)+t.ak4pfjets_p4.at(1)).M()
         else:
             ptb1 = t.ak4pfjets_p4.at(bjet_index[0]).Pt()
             ptb2 = t.ak4pfjets_p4.at(bjet_index[1]).Pt()
@@ -129,7 +144,6 @@ def feature_generate(file_name, file_name_out):
             new_mct[0] = math.sqrt(2*ptb1*ptb2*(1+math.cos(dphibb)))
             new_mbb[0] = di_bjet.M()
 
-                  
         if ngoodjet_pt_eta!=t.ngoodjets and t.ngoodjets>=0:
             print("Error! ngoodjets!!!")
             print(ngoodjet_pt_eta, t.ngoodjets)
@@ -146,16 +160,13 @@ def feature_generate(file_name, file_name_out):
 #Main Function
 from create_file_list import get_files
 MC_list = get_files()
-file_location_out = "../root_file_temp/Sicong_20180228/"
-for MC in MC_list:#[6:]:
+file_location_out = "../root_file_temp/Sicong_20180327/"
+for MC in MC_list[6:]:
     MC_name = MC["name"]
-    if not(MC_name == "rare"):    continue;
+    #if not(MC_name == "rare"):    continue;
     print(MC_name)
     file_name_list = MC["file_name_list"]
-    
     for file_name in file_name_list:
         tmp_file_name = file_name[file_name.rfind("/")+1:]
-        if not( "WZTo2L" in tmp_file_name):
-            continue;
         file_name_out = file_location_out + file_name[file_name.rfind("/")+1:]
         feature_generate(file_name, file_name_out)

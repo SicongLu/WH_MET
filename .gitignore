@@ -26,6 +26,7 @@
 *.sql
 *.sqlite
 *.root
+*.csv
 *.pyc
 
 # OS generated files #

@@ -36,7 +36,6 @@ def get_cutflow(file_name,  condition_list):
     return cutflow_dict
 
 #Basic Set-up
-#condition_list = ["ngoodleps == 1", "nvetoleps == 1", "PassTrackVeto == 1", "PassTauVeto == 1", "ngoodjets == 2", "ngoodbtags ==2", "mct >= 170", "pfmet >= 125", "mt_met_lep >= 150"]
 from selection_criteria import get_cut_dict
 cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
 condition_list = [cut_dict[item] for item in current_cut_list]
@@ -49,7 +48,7 @@ new_location = "../root_file_temp/Sicong_20180228/"
 summary_cutflow_dict = {}
 hist_list = []
 name_list = []
-for MC in MC_list[0:7]:
+for MC in MC_list[0:6]:
     MC_name = MC["name"]
     file_name_list = MC["file_name_list"]
     

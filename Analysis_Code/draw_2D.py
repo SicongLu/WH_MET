@@ -10,6 +10,7 @@ def delta_R(v1, v2):
     deta = abs(v1.Eta()-v2.Eta())
     dR = numpy.sqrt(dphi*dphi+deta*deta)
     return dR
+
 def draw_histo_2D(file_name, str_condition, var_dict1,var_dict2):
     #print(file_name, var_name, str_condition, bin_num, xmin, xmax)
     BTAGWP = 0.5426; #Loose btag working point
@@ -31,17 +32,24 @@ def draw_histo_2D(file_name, str_condition, var_dict1,var_dict2):
             t.GetEntry(i)
             dR_bb = -999
             weight = weight_form.EvalInstance()
-            #if weight == 0:
-            #    continue
-            v1 = 0
+            if weight == 0:
+                continue
             m_id = t.genqs_motherid
+            v1 = 0
+            v2 = 0
+            num_H_daughter = 0
             for i in range(len(m_id)):
-                if t.genqs_motherid.at(i) == 25:
-                    if v1 == 0: v1 = t.genqs_p4.at(i)
-                    else: v2 = t.genqs_p4.at(i)
-            if v1 == v2:
-                continue;
+                if t.genqs_motherid.at(i) == 25 and t.genqs_id.at(i) == -5 and v1 == 0:
+                    num_H_daughter += 1
+                    v1 = t.genqs_p4.at(i)
+                if t.genqs_motherid.at(i) == 25 and t.genqs_id.at(i) == 5 and v2 == 0:
+                    num_H_daughter += 1
+                    v2 = t.genqs_p4.at(i)
+            #print(num_H_daughter)
+            
             dR_bb = delta_R(v1,v2)          
+            #if dR_bb > 0.4:
+            #    print("m_H = %.2f"%(v1+v2).M())
             value = -999
             for i in range(len(t.genbosons_id)):
                 if t.genbosons_id.at(i) == 25:
@@ -162,7 +170,7 @@ plot_dict_list = [\
 
 #Common set-up 
 lumi = 35.9
-plot_folder_name = "WH_Analysis_Correlations_1jet/"
+plot_folder_name = "WH_Analysis_Correlations/"
 sample_index_list = [5]
 
 MC_multi = 5
@@ -178,12 +186,12 @@ current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
 current_condition_list = [cut_dict[item] for item in current_cut_list]
 str_condition = combine_cuts(current_condition_list)
 #str_condition = "("+str_condition+"&& ngoodjets == 1)*scale1fb*"+str(lumi)
-str_condition = "("+str_condition+"&& ngoodjets == 1)*scale1fb*"+str(lumi)
+str_condition = "("+str_condition+"&& ngoodjets == 2)*scale1fb*"+str(lumi)
 #Plotting
 for sample_index in sample_index_list:
 #    plot_comparison(plot_dict_list[0], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)
 #    plot_comparison(plot_dict_list[0], plot_dict_list[1], lumi, MC_multi, sample_index, plot_folder_name)
 #    plot_comparison(plot_dict_list[1], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)
-#    plot_comparison(plot_dict_list[4], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)
-    plot_comparison(plot_dict_list[5], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)
+    plot_comparison(plot_dict_list[4], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)
+#    plot_comparison(plot_dict_list[5], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)
 
