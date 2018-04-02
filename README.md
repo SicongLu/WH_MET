@@ -22,6 +22,9 @@ One is also trying to use XGBoost to get some intuition on the best possible sen
 The relevant .csv file can be found in:
 csv_file_temp/
 
+The limit setting procedure is directly adopted from Dr Miaoyuan Liu: git@github.com:mialiu149/limitsetting.git
+One is adding more comments...
+
 
 #Contact
 silu@physics.ucsd.edu

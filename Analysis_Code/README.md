@@ -7,6 +7,10 @@ selection_criteria.py will return the list of cuts which one is testing and comm
 
 Note that the two scripts above are referenced in all of the following codes.
 
+# Feature generation
+Generate new features from old ones and save in a new .root files.
+(Will add trimming later...)
+
 # 1D and 2D variable distribution plots
 quick_draw.py will use the simplest TTree.Draw() to quickly draw the relevant branches in certain regions.
 
