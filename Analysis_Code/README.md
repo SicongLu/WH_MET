@@ -11,6 +11,13 @@ Note that the two scripts above are referenced in all of the following codes.
 Generate new features from old ones and save in a new .root files.
 (Will add trimming later...)
 
+# Signal Grid File Parsing
+get_grid_entry.py makes text files with all the entry number for each points at:
+/home/users/siconglu/WH_MET/root_file_temp/Grid_20180404/entry_location/
+parse_ttree.C will parse the tree accordingly for each text file.
+
+
+
 # 1D and 2D variable distribution plots
 quick_draw.py will use the simplest TTree.Draw() to quickly draw the relevant branches in certain regions.
 

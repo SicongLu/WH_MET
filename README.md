@@ -25,9 +25,5 @@ csv_file_temp/
 The limit setting procedure is directly adopted from Dr Miaoyuan Liu: git@github.com:mialiu149/limitsetting.git
 One is adding more comments...
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a4b027b227ddfa75f29afa5d0743e23cadfcef75
 # Contact
 silu@physics.ucsd.edu
