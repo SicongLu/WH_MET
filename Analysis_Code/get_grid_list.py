@@ -32,7 +32,7 @@ with open('entry_mass_list.pkl', 'r') as f_pickle:
 grid_chargino = 0
 grid_lsp = 0
 file_name = "%.0f_%.0f.txt"%(grid_chargino, grid_lsp)
-out_dir = "../root_file_temp/Grid_20180404/"
+out_dir = "../root_file_temp/Grid_20180404/entry_location/"
 f_small = open(file_name, 'w')
 for line in read_list:
     [entry_num, mass_chargino, mass_lsp] = line
