@@ -28,6 +28,9 @@
 *.root
 *.csv
 *.pyc
+*.pkl
+*.pickle
+*root_file_temp/*
 
 # OS generated files #
 ######################
