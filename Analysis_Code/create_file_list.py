@@ -102,7 +102,8 @@ def getgrid():
     [650, 1], [650, 25], [650, 50], [650, 75], [650, 100], [650, 125], [650, 150], [650, 175], [650, 200], [650, 225], [650, 250], [650, 275], [650, 300], \
     [675, 1], [675, 25], [675, 50], [675, 75], [675, 100], [675, 125], [675, 150], [675, 175], [675, 200], [675, 225], [675, 250], [675, 275], [675, 300], \
     [700, 1], [700, 25], [700, 50], [700, 75], [700, 100], [700, 125], [700, 150], [700, 175], [700, 200], [700, 225], [700, 250], [700, 275], [700, 300], \
-    [126, 1]]
+    #[126, 1]
+    ]
     # need to printout a card called cards/points_TChiWH.txt
 #    points = open('cards/points_tchwh.txt','w') 
 #    for point in grid:
@@ -114,6 +115,7 @@ def generate_scan_dict():
     for point in grid:
         tmp_dict = {}
         tmp_dict["name"] = "(%.0f, %.0f)"%(point[0], point[1])
-        tmp_dict["file_name_list"] = ["TChiWH_%.0f_%.0f.root)"%(point[0], point[1])]
+        tmp_dict["file_name_list"] = ["TChiWH_%.0f_%.0f.root"%(point[0], point[1])]
+        grid_list.append(tmp_dict)
         
     return grid_list

@@ -6,7 +6,7 @@ import os
 from math import sqrt
 import pandas as pd
 
-def printcard(masspoint,masspointinfo,binN,backgrounds,errors,selection,carddir):
+def printcard(masspoint,masspointinfo,binN,backgrounds,errors, bin_name ,carddir):
   
     sigN,sigE = masspointinfo['yield'], masspointinfo['stat']  
     cardname = carddir+'/datacard_'+str(binN)+'_tchwh_'+masspoint+'.txt'
@@ -16,10 +16,10 @@ def printcard(masspoint,masspointinfo,binN,backgrounds,errors,selection,carddir)
     card.write("kmax  *  number of nuisance parameters\n")
     card.write("------------\n")
     card.write("# observations\n")
-    card.write("bin        "+str(binN)+'\n')
+    card.write("bin        "+bin_name+'\n')
     card.write("observation  " + str(8)+'\n')
     card.write("#now we list all expected number of events\n")
-    bintoprint = str(binN)+' '
+    bintoprint = bin_name+' '
     card.write("bin "+7*bintoprint+'\n')
     card.write("process     sig       2ltop       WLF       1ltop       wzbb   rare WHF \n")
     card.write("process      0        1         2         3          4      5    6\n")
@@ -73,11 +73,12 @@ def getgrid():
     [650, 1], [650, 25], [650, 50], [650, 75], [650, 100], [650, 125], [650, 150], [650, 175], [650, 200], [650, 225], [650, 250], [650, 275], [650, 300], \
     [675, 1], [675, 25], [675, 50], [675, 75], [675, 100], [675, 125], [675, 150], [675, 175], [675, 200], [675, 225], [675, 250], [675, 275], [675, 300], \
     [700, 1], [700, 25], [700, 50], [700, 75], [700, 100], [700, 125], [700, 150], [700, 175], [700, 200], [700, 225], [700, 250], [700, 275], [700, 300], \
-    [126, 1]]
+    #[126, 1]
+    ]
     # need to printout a card called cards/points_TChiWH.txt
-#    points = open('cards/points_tchwh.txt','w') 
-#    for point in grid:
-#        points.write(str('tchwh_'+str(point[0])+'_'+str(point[1]))+'\n')
+    points = open('cards/points_tchwh.txt','w') 
+    for point in grid:
+        points.write(str('tchwh_'+str(point[0])+'_'+str(point[1]))+'\n')
     return grid
 def getsignalscan(signalfile,nzbins):
     # open  files
@@ -154,6 +155,32 @@ def combine(cards,masspoint):
     os.system("combineCards.py "+cardstocombine)
     return "cards/combinedcards/"+masspoint+'.txt'
 
+def get_temp_syst(mass_chargino, mass_lsp, in_dict):
+    syst_location = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_40fb_v8/"
+    syst_list =['sysmet','sysbtagsf' ,'syslepsf', 'sysscale', 'systrig', 'sysjec'] 
+    f1 = open(syst_location+"datacard_1_tchwh_%.0f_%.0f.txt"%(mass_chargino, mass_lsp),"r")
+    for line in f1:
+        for syst in syst_list:
+            if not(syst in line): continue;
+            nums = line.split(" ")
+            nums = [item for item in nums if not(item == "")]
+            value = float(nums[2])
+            if in_dict[syst]<value:
+                in_dict[syst] = value
+    f1.close()
+    f2 = open(syst_location+"datacard_2_tchwh_%.0f_%.0f.txt"%(mass_chargino, mass_lsp),"r")
+    for line in f2:
+        for syst in syst_list:
+            if not(syst in line): continue;
+            nums = line.split(" ")
+            nums = [item for item in nums if not(item == "")]
+            value = float(nums[2])
+            if in_dict[syst]<value:
+                in_dict[syst] = value
+    return in_dict    
+        
+    
+    
 def str2yield(tmp_str):
     num_list = tmp_str.split(" +- ")
     num_yield = float(num_list[0])
@@ -184,51 +211,49 @@ def test_get_scan(yield_file, SR_list = ["SR1", "SR2"]):
             mass_chargino = mass[0]
             mass_lsp = mass[1]
             MC_name = "(%.0f, %.0f)"%(mass_chargino,mass_lsp)
-        
             tmp_str = df[SR][df[' '] == MC_name].values[0]
+            
             y, s = str2yield(tmp_str)
             namestring=str(mass[0])+'_'+str(mass[1])
-            scandict[namestring]={'yield': y, 'stat': s, 'sysmet': 1,'sysbtagsf':1 ,'syslepsf':1, 'sysscale':1, 'systrig':1, 'sysjec':1}
+            scandict[namestring]={'yield': y, 'stat': s, 'sysmet': 0,'sysbtagsf':0 ,'syslepsf':0, 'sysscale':0, 'systrig':0, 'sysjec':0}
+            scandict[namestring] = get_temp_syst(mass_chargino, mass_lsp, scandict[namestring])
+            
         scandicts.append(scandict)
     
     print 'got backgrounds:', backgrounds
     print errors
-    
     
     return scandicts, backgrounds,errors
 
 if __name__ == "__main__":
    # specify selection here to get a set of backgrounds
    version='0'
-   zbins = 2
+   SR_list = ["SR1", "SR2"]
+   zbins = len(SR_list)
    selection=""
-   carddir = "cards_test"#%version
-   yield_file = "../Analysis_Code/table_of_yield_03_28.csv"
-   scan_dicts, backgrounds,errors = test_get_scan(yield_file)
-   
-   
+   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_test"#%version
+   yield_file = "../Analysis_Code/table_of_yield_04_05.csv"
+   scandicts, bkgs,err = test_get_scan(yield_file, SR_list = SR_list)
  
-#   # specify signal file here
-#   scandicts = getsignalscan(signalfile,zbins)
-#   # output directory for cards
-#    ### check if output cards exist
-#   if os.path.isdir(carddir): 
-#       overwritedir = raw_input("cards directory already exist, overwrite? (y/n)")
-#       if overwritedir is "y":
-#          print "will overwrite cards in "+carddir
-#       else:
-#          dirname = raw_input("name the output directory for cards")
-#          if dirname is not carddir:
-#             os.mkdir(dirname)
-#   else: 
-#       os.mkdir(carddir)
-#       print "will save cards in %s"%carddir
-#
-#   cards = []
-#   sys ={'stat':[] , 'sysscale':[] , 'yield':[] , 'sysbtagsf':[] , 'syslepsf': [], 'sysmet':[],'systrig':[],'sysjec':[]} 
-#
-#   for zbin in range(1,zbins+1):
-#       print zbin
-#       for k,kinfo in scandicts[zbin-1].items():
-#           card = printcard(k,kinfo,zbin,bkgs,err,selection,carddir)
-#   
+   # output directory for cards
+    ### check if output cards exist
+   if os.path.isdir(carddir): 
+       overwritedir = raw_input("cards directory already exist, overwrite? (y/n)")
+       if overwritedir is "y":
+          print "will overwrite cards in "+carddir
+       else:
+          dirname = raw_input("name the output directory for cards")
+          if dirname is not carddir:
+             os.mkdir(dirname)
+   else: 
+       os.mkdir(carddir)
+       print "will save cards in %s"%carddir
+
+   cards = []
+   sys ={'stat':[] , 'sysscale':[] , 'yield':[] , 'sysbtagsf':[] , 'syslepsf': [], 'sysmet':[],'systrig':[],'sysjec':[]} 
+
+   for zbin in range(1,zbins+1):
+       print zbin
+       for k,kinfo in scandicts[zbin-1].items():
+           card = printcard(k,kinfo,zbin,bkgs,err,SR_list[zbin-1],carddir)
+   

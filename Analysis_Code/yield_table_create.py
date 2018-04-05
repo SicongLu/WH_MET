@@ -64,7 +64,7 @@ condition_list = [cut_dict[item] for item in current_cut_list]
 print(region_cut_dict.keys())
 #Main function
 MC_list = get_files()
-new_location = "../root_file_temp/Sicong_20180327/"
+
 
 summary_yield_dict = {}
 summary_stats_dict = {}
@@ -72,7 +72,20 @@ hist_list = []
 name_list = []
 f_record = open("yield_record.txt","a")
 f_record.write("Start Recording...\n")
-for MC in MC_list[4:]:#[6:7]:#[10:]:
+
+new_location = "../root_file_temp/Grid_20180404/"
+grid_list = generate_scan_dict()
+for MC in grid_list[:]:
+    MC_name = MC["name"]
+    print(MC_name)
+    file_name = new_location + MC["file_name_list"][0]
+    yield_dict, stats_dict = get_yield(file_name,  region_cut_dict)
+    f_record.write(str(yield_dict)+"\n")
+    name_list.append(MC_name)
+    summary_yield_dict[MC_name] = yield_dict
+    summary_stats_dict[MC_name] = stats_dict
+new_location = "../root_file_temp/Sicong_20180327/"
+for MC in MC_list[:]:#[6:7]:#[10:]:
     MC_name = MC["name"]
     file_name_list = MC["file_name_list"]
     
@@ -95,22 +108,12 @@ for MC in MC_list[4:]:#[6:7]:#[10:]:
     name_list.append(MC_name)
     summary_yield_dict[MC_name] = sum_dict
     summary_stats_dict[MC_name] = sum_stats_dict
-new_location = "../root_file_temp/Grid_20180404/"
-grid_list = generate_scan_dict()
-for MC in grid_list[0:4]:
-    MC_name = MC["name"]
-    file_name = MC["file_name_list"][0]
-    yield_dict, stats_dict = get_yield(file_name,  region_cut_dict)
-    f_record.write(str(yield_dict)+"\n")
-    name_list.append(MC_name)
-    summary_yield_dict[MC_name] = yield_dict
-    summary_stats_dict[MC_name] = stats_dict
     
 f_record.close()
 #Save the yield Table in .csv file
 if_transpose = True #Transpose the table to follow the convention
 import csv
-with open('table_of_yield_03_28.csv', 'w') as csvfile:    #create csv file with w mode
+with open('table_of_yield_04_05.csv', 'w') as csvfile:    #create csv file with w mode
     key_list = [key for key, str_condition in region_cut_dict.iteritems()]
     key_list = sorted(key_list)
     if if_transpose:

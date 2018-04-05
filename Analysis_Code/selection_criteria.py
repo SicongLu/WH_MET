@@ -172,8 +172,8 @@ def get_cut_dict():
     PSR_cut = combine_cuts(PSR_condition_list)
     
 #    region_cut_dict["3jet_met_200_mct200"] = PSR_cut + "&& mct > 200"
-#    region_cut_dict["3jet_met_200_mct225"] = PSR_cut + "&& mct > 225"
-#    region_cut_dict["3jet_met_200_mct250"] = PSR_cut + "&& mct > 250"
+    region_cut_dict["3jet_met_200_mct225"] = PSR_cut + "&& mct > 225"
+    region_cut_dict["3jet_met_200_mct250"] = PSR_cut + "&& mct > 250"
 #    region_cut_dict["3jet_met_200_mct275"] = PSR_cut + "&& mct > 275"
 #    region_cut_dict["3jet_met_200_mct300"] = PSR_cut + "&& mct > 300"
         
@@ -186,9 +186,21 @@ def get_cut_dict():
 #    region_cut_dict["3jet_mct200"] = PSR_cut + "&& mct > 200"
 #    region_cut_dict["3jet_mct225"] = PSR_cut + "&& mct > 225"
 #    region_cut_dict["3jet_mct250"] = PSR_cut + "&& mct > 250"
-#    region_cut_dict["3jet_mct275"] = PSR_cut + "&& mct > 275"
-#    region_cut_dict["3jet_mct300"] = PSR_cut + "&& mct > 300"
+    region_cut_dict["3jet_mct275"] = PSR_cut + "&& mct > 275"
+    region_cut_dict["3jet_mct300"] = PSR_cut + "&& mct > 300"
 #    region_cut_dict["3jet_mct350"] = PSR_cut + "&& mct > 350"
+    
+    xgb_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto"]
+    xgb_condition_list = [cut_dict[item] for item in xgb_list]
+    xgb_cut = combine_cuts(xgb_condition_list)
+    
+#    region_cut_dict["xgb0p6"] = PSR_cut + "&& xgb_proba > 0.6"
+#    region_cut_dict["xgb0p7"] = PSR_cut + "&& xgb_proba > 0.7"
+#    region_cut_dict["xgb0p8"] = PSR_cut + "&& xgb_proba > 0.8"
+#    region_cut_dict["xgb0p9"] = PSR_cut + "&& xgb_proba > 0.9"
+#    region_cut_dict["xgb0p95"] = PSR_cut + "&& xgb_proba > 0.94"
+#    region_cut_dict["xgb0p97"] = PSR_cut + "&& xgb_proba > 0.97"
     
     return cut_dict, current_cut_list, region_cut_dict
 

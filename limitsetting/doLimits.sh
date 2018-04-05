@@ -3,16 +3,23 @@
 #Needs to be run from CMSSW_7_1_5/src/HiggsAnalysis/CombinedLimit/scripts/
 
 
-RUNDIR=/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/
-INDIR=${RUNDIR}/WH_MET_limitsetting/cards_40fb_v8
-OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan40fbv9
+RUNDIR=/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src
+#INDIR=${RUNDIR}/WH_MET_limitsetting/cards_40fb_v8
+#OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan40fbv9
+#
+#declare -a samples=(`cat $INDIR/points_tchwh.txt`)
 
-declare -a samples=(`cat $INDIR/points_tchwh.txt`)
+INDIR=${RUNDIR}/WH_MET_limitsetting/cards_test
+OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan_test
+
+declare -a samples=(`cat cards/points_tchwh.txt`)
+
 #The samples is the filenames that is stored in points_tchwh.txt.
 
 #need to combine cards from multiple signal regions if necessary
 for i in "${samples[@]}"
 do
+  echo $i
   if [ ! -e "$INDIR/datacard_all_$i.txt" ]; then
     python combineCards.py "$INDIR/datacard_"*"_$i.txt" > "$INDIR/datacard_all_$i.txt"  
   fi

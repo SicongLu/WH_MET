@@ -12,6 +12,7 @@ int parse_one_grid(string txt_file_name){
     std::stringstream ss(txt_file_name);
     ss >> grid_chargino >> c >> grid_lsp>>tmp;
     cout<<grid_chargino<<"   "<<grid_lsp<<endl;
+    if (grid_chargino != 126) return EXIT_SUCCESS;
 
     TFile *oldfile;
     oldfile = new TFile("../root_file_temp/Grid_20180404/Grid_Merged.root");
