@@ -15,13 +15,13 @@ a.set_active_branch()
 a.load_xgb_model()
 read_list = []
 MC_list = get_files()
-for MC in MC_list:
+for MC in MC_list[0:6]:
     print(MC['name'])
     for file_name in MC['file_name_list']:
         file_name = file_name[file_name.rfind("/")+1:]
         file_name = file_name[:file_name.rfind(".")]
         read_list.append(file_name)
-        if not ("WZTo2L2Q_amcnlo_pythia8_25ns" in read_list) or "WZTo2L2Q_amcnlo_pythia8_25ns" == file_name: continue
+        #if not ("WZTo2L2Q_amcnlo_pythia8_25ns" in read_list) or "WZTo2L2Q_amcnlo_pythia8_25ns" == file_name: continue
         #a.read_df_from_root(file_name)
         a.load_csv(file_name)
         a.apply_xgb_proba()

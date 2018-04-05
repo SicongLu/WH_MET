@@ -1,12 +1,13 @@
 import pandas_analysis
-
-from create_file_list import get_files
+from create_file_list import get_files, getgrid, generate_scan_dict
 a = pandas_analysis.pandas_analyzer()
 a.set_active_branch()
 
 MC_list = get_files()
 read_list = []
-for MC in MC_list[10:]:
+
+grid_list = generate_scan_dict()
+for MC in MC_list[0:6]:#+grid_list[0:1]
     print(MC['name'])
     for file_name in MC['file_name_list']:
         file_name = file_name[file_name.rfind("/")+1:]
