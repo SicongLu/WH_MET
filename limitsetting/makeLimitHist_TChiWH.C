@@ -68,10 +68,12 @@ int makeLimitHist_TChiWH()
 {
 
 //  setTDRStyle();           
-  
+  gStyle->SetOptStat(0);
   TH1F * h_susyxsecs  = NULL;
   TFile * f_susyxsecs = NULL;
-  string file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_test/";
+
+  TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan40fbv9/";
+  //TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_test/";
   f_susyxsecs = TFile::Open(file_dir+"xsec_susy_13tev.root","READ");
   h_susyxsecs = (TH1F*)f_susyxsecs->Get("h_xsec_c1n2")->Clone("h_susyxsecs");
 
@@ -87,8 +89,8 @@ int makeLimitHist_TChiWH()
   TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
   gStyle->SetNumberContours(NCont);
   
-    TFile * f_rvalues = TFile::Open(file_dir+"r-values_tchwh.root","READ");  
- // TFile * f_rvalues = TFile::Open("r-values_TChiWH.root","READ");  
+  TFile * f_rvalues = TFile::Open(file_dir+"r-values_tchwh.root","READ");  
+   
   
   TH2F * massplane        = (TH2F*) f_rvalues->Get("hExp")   -> Clone("massplane");
   TH2F * massplane_obs    = (TH2F*) f_rvalues->Get("hObs")   -> Clone("massplane_obs");
@@ -332,17 +334,18 @@ int makeLimitHist_TChiWH()
   l1->SetTextSize(0.033);
   l1->SetShadowColor(kWhite);    
   l1->SetFillColor(kWhite);    
-  l1->AddEntry(massplane_obs , "Observed limit, #pm 1 s.d._{theory}"            , "l");
-  l1->AddEntry(contourplot , "Expected limit, +1 s.d._{exp.}", "l");
+  l1->AddEntry(massplane_obs , "Observed limit, #pm 1 #sigma_{theory}"            , "l");
+  l1->AddEntry(contourplot , "Expected limit, #pm 1 #sigma_{exp.}", "l");
   l1->Draw("same");
 
-  TLatex *clstex1 = NULL;
-  clstex1 = new TLatex(0.315,0.74, "(-1 s.d._{exp.} no exclusion)" );    
-  clstex1->SetNDC();    
-  clstex1->SetTextSize(0.032);    
-  clstex1->SetLineWidth(2);
-  clstex1->SetTextFont(42);    
-  clstex1->Draw();
+//  TLatex *clstex1 = NULL;
+//  clstex1 = new TLatex(0.315,0.74, "(-1 s.d._{exp.} no exclusion)" );    
+//  clstex1->SetNDC();    
+//  clstex1->SetTextSize(0.032);    
+//  clstex1->SetLineWidth(2);
+//  clstex1->SetTextFont(42);    
+//  clstex1->Draw();
+  
   TLine * top_margin = new TLine(100,300,650,300);
   top_margin->SetLineWidth(4);
   top_margin->SetLineColor(kBlack);
@@ -413,15 +416,16 @@ int makeLimitHist_TChiWH()
   cmstexbold->SetTextFont(62);    
   cmstexbold->Draw();
 
-  cmstexbold = new TLatex(0.29,0.94, "" );    
+  cmstexbold = new TLatex(0.29,0.94, "Internal" );    
   cmstexbold->SetNDC();    
   cmstexbold->SetTextSize(0.0375);    
   cmstexbold->SetLineWidth(2);
   cmstexbold->SetTextFont(52);    
   cmstexbold->Draw();
   
-  string plot_dir = "/home/users/siconglu/CMSTAS/software/niceplots/WH_Expected_Exclusion/";
+  TString plot_dir = "/home/users/siconglu/CMSTAS/software/niceplots/WH_Expected_Exclusion/";
   c_massplane->SaveAs(plot_dir+"TChiWHlnubb_Exclusion_13TeV_test.pdf");
 
   return 0;
 }
+
