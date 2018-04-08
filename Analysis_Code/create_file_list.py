@@ -1,11 +1,11 @@
 import glob
 import os
 def get_files():
+    '''Get the path to the MC files.'''
     file_location = "../root_file_temp/Mia_20180223/"
     MC_list = []
     
-    #file_name_list = [os.path.abspath(path) for path in file_name_list]
-    #MC signal points (Need More!!!)
+    #Standard, no skimmed, MC signal points
     name = "(225, 75)"
     file_name_list = glob.glob(file_location+"TChiWH_225_75.root")
     MC_list.append({"name":name,"file_name_list":file_name_list})
@@ -67,9 +67,9 @@ def get_files():
     file_name_list += glob.glob(file_location+"ZZTo*.root")
     file_name_list += glob.glob(file_location+"WminusH*.root")
     file_name_list += glob.glob(file_location+"WplusH*.root")
-    file_name_list += glob.glob(file_location+"WWW.root")
-    file_name_list += glob.glob(file_location+"WWZ.root")
-    file_name_list += glob.glob(file_location+"WZG.root")
+    file_name_list += glob.glob(file_location+"*WWW*.root")
+    file_name_list += glob.glob(file_location+"*WWZ*.root")
+    file_name_list += glob.glob(file_location+"*WZG*.root")
     file_name_list += glob.glob(file_location+"*WZZ*.root")
     file_name_list += glob.glob(file_location+"*ZZZ*.root") 
     file_name_list += glob.glob(file_location+"*WWG*.root")
@@ -79,6 +79,7 @@ def get_files():
     return MC_list
 
 def getgrid():
+    '''Define the grids.'''
     grid = [[150, 1], [150, 24], \
     [175, 1], [175, 25], [175, 49], \
     [200, 1], [200, 25], [200, 50], [200, 74], \
@@ -101,15 +102,11 @@ def getgrid():
     [625, 1], [625, 25], [625, 50], [625, 75], [625, 100], [625, 125], [625, 150], [625, 175], [625, 200], [625, 225], [625, 250], [625, 275], [625, 300], \
     [650, 1], [650, 25], [650, 50], [650, 75], [650, 100], [650, 125], [650, 150], [650, 175], [650, 200], [650, 225], [650, 250], [650, 275], [650, 300], \
     [675, 1], [675, 25], [675, 50], [675, 75], [675, 100], [675, 125], [675, 150], [675, 175], [675, 200], [675, 225], [675, 250], [675, 275], [675, 300], \
-    [700, 1], [700, 25], [700, 50], [700, 75], [700, 100], [700, 125], [700, 150], [700, 175], [700, 200], [700, 225], [700, 250], [700, 275], [700, 300], \
-    #[126, 1]
+    [700, 1], [700, 25], [700, 50], [700, 75], [700, 100], [700, 125], [700, 150], [700, 175], [700, 200], [700, 225], [700, 250], [700, 275], [700, 300], \#[126, 1] Not sure wh
     ]
-    # need to printout a card called cards/points_TChiWH.txt
-#    points = open('cards/points_tchwh.txt','w') 
-#    for point in grid:
-#        points.write(str('tchwh_'+str(point[0])+'_'+str(point[1]))+'\n')
     return grid
 def generate_scan_dict():
+    '''Put the grid in the same format as other background MC files.
     grid = getgrid()
     grid_list = []
     for point in grid:

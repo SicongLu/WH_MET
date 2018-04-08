@@ -1,17 +1,21 @@
 #Note that this needs to be checked, (with Dr Liu)
 #Link the root file to this folder.
-sig_dir=/nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/whsignoskim_moriond/ #Note that v1 is inapproriate as some of these (probably except 700) are skimmed
+#Note that v1 is inapproriate as some of these (probably except 700) are skimmed
+sig_dir=/nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/whsignoskim_moriond/ 
 bkg_dir=/nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/moriond2017.v10/output/
-#Signal
+
+#Signal Sample Grid
 ln -s ${sig_dir}TChiWH*.root .
-ln -s /nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/whsignoskim_moriond_v1/TChiWH_700_1.root . #Note that v1 is inapproriate as some of these (probably except 700) are skimmed
-#BKG Cate #1: ttbar background
-#Including ttbarDiLept, and tW->ll;
+ln -s /nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/whsignoskim_moriond_v1/TChiWH_700_1.root . 
+#Note that v1 is inapproriate as some of these (probably except 700) are skimmed
+
+#BKG Cate #1: ttbar background, including ttbarDiLept, and tW->ll;
 ln -s ${bkg_dir}ttbar_diLept*.root .
+
 #BKG Cate #2 (together with #3): W + light jets(all flavors except b) LF (light flavor)
 #BKG Cate #3: W boson in association with b-jets, called W+HF (heavy flavor)
 ln -s ${bkg_dir}WJetsToLNu_madgraph_pythia8_25ns*.root .
-ln -s ${bkg_dir}WJetsToLNu_HT800To1200*.root .
+ln -s ${bkg_dir}WJetsToLNu_HT800To1200*.root . #???
 ln -s ${bkg_dir}extmerge/WJetsToLNu*.root .
 
 #BKG Cate #4: WZ production, W->lep+nu, Z->bb
