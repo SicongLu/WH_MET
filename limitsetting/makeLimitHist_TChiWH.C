@@ -72,8 +72,8 @@ int makeLimitHist_TChiWH()
   TH1F * h_susyxsecs  = NULL;
   TFile * f_susyxsecs = NULL;
 
-  TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan40fbv9/";
-  //TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_test/";
+  //TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan40fbv9/";
+  TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_test/";
   f_susyxsecs = TFile::Open(file_dir+"xsec_susy_13tev.root","READ");
   h_susyxsecs = (TH1F*)f_susyxsecs->Get("h_xsec_c1n2")->Clone("h_susyxsecs");
 
@@ -424,7 +424,7 @@ int makeLimitHist_TChiWH()
   cmstexbold->Draw();
   
   TString plot_dir = "/home/users/siconglu/CMSTAS/software/niceplots/WH_Expected_Exclusion/";
-  c_massplane->SaveAs(plot_dir+"TChiWHlnubb_Exclusion_13TeV_test.pdf");
+  c_massplane->SaveAs(plot_dir+"TChiWHlnubb_Exclusion_13TeV_test_new.pdf");
 
   return 0;
 }
