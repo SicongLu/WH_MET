@@ -18,7 +18,7 @@ class pandas_analyzer:
         print('Setting up analysis')
         self.lumi = 35.9
         self.old_features = ["mbb", "ngoodjets", "MT2W", "Mlb_closestb", "mct", "mt_met_lep",\
-        "pfmet", "topness", "topnessMod","mindphi_met_j1_j2","scale1fb","ptbb"]
+        "pfmet", "topness", "topnessMod","mindphi_met_j1_j2","scale1fb","ptbb",\        "new_mbb","new_met","new_mt","new_mct"]
         self.features = self.old_features + ["weight"]
         #self.features_name_dict = {"mbb":"M_{bb}"}
         self.csv_location = "../csv_file_temp/"
@@ -37,7 +37,9 @@ class pandas_analyzer:
                 split_list = [item for item in split_list if not(item == "")]
                 for split in split_list:
                     self.active_branch_list.append(feature)
-        self.weight_branch = ["weight_PU","weight_lepSF","weight_btagsf","xsec","scale1fb"]
+        self.weight_branch = ["weight_PU","weight_lepSF","weight_btagsf","xsec","scale1fb",\
+        "HLT_SingleMu","HLT_SingleEl",\
+        "lep1_pdgid","PassTrackVeto","PassTauVeto"]
         self.active_branch_list = self.active_branch_list + self.weight_branch              
     def get_weight_str(self, file_name, entry_num):
         ''''''

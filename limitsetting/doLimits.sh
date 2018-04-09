@@ -9,13 +9,15 @@ RUNDIR=/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src
 #
 #declare -a samples=(`cat $INDIR/points_tchwh.txt`)
 
-INDIR=${RUNDIR}/WH_MET_limitsetting/cards_test
-OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan_test
+INDIR=${RUNDIR}/WH_MET_limitsetting/cards_test_04_09
+OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan_test_04_09
 
 declare -a samples=(`cat cards/points_tchwh.txt`)
 
 #The samples is the filenames that is stored in points_tchwh.txt.
-
+cp combineCards.py $INDIR/.
+cd $INDIR
+cmsenv
 #need to combine cards from multiple signal regions if necessary
 for i in "${samples[@]}"
 do
@@ -25,6 +27,7 @@ do
   fi
 done
 
+cd /home/users/siconglu/WH_MET/limitsetting/
 if [ ! -d "$OUTDIR" ]; then
   mkdir -p "$OUTDIR"
   mkdir -p "$OUTDIR/log"

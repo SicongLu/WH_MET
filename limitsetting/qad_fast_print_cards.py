@@ -231,8 +231,8 @@ if __name__ == "__main__":
    SR_list = ["SR1", "SR2"]
    zbins = len(SR_list)
    selection=""
-   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_test"#%version
-   yield_file = "../Analysis_Code/table_of_yield_04_05.csv"
+   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_test_04_09"#%version
+   yield_file = "../Analysis_Code/table_of_yield_04_09.csv"
    scandicts, bkgs,err = test_get_scan(yield_file, SR_list = SR_list)
  
    # output directory for cards

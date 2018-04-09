@@ -17,7 +17,7 @@ def get_total_file_size(file_list):
     return bytes_num
 
 
-from create_file_list import get_files, getgrid()
+from create_file_list import get_files, getgrid, generate_scan_dict
 a = pandas_analysis.pandas_analyzer()
 a.set_active_branch()
 a.load_xgb_model()
@@ -50,8 +50,7 @@ for MC in MC_list[0:0]+grid_list[:]:
         #a.save_df_to_csv()
         a.save_df_to_root()
 
-        
-    
+
     current_time = time.time()
     print("Progress: %.1f percent processed"%(processed_bytes_num/total_bytes_num*100.))
     minutes_left = 1.*(current_time-start_time)/processed_bytes_num*(total_bytes_num-processed_bytes_num)/60.
