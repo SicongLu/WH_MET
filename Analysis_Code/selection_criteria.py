@@ -89,20 +89,23 @@ def get_cut_dict():
     cut_dict['zerobtags'] = "nbtag_loose == 0" 
     
     #cut_dict['m_bb'] =  "(mbb > 90 && mbb < 150)"
-    cut_dict['m_bb'] =  "(new_mbb > 90 && new_mbb < 150)"
-    #cut_dict['m_bb'] =  "(new_mbb > 90 && new_mbb < 150)"
     #cut_dict['inverted_m_bb'] =  "!(mbb > 90 && mbb < 150)"
+    cut_dict['m_bb'] =  "(new_mbb > 90 && new_mbb < 150)"
     cut_dict['inverted_m_bb'] =  "!(new_mbb > 90 && new_mbb < 150)"
     
-    cut_dict['event_met_pt'] =  "(pfmet > 125)"
-    cut_dict['event_met_pt_med'] =  "(pfmet > 125 && pfmet <=200)"
-    cut_dict['event_met_pt_high'] =  "(pfmet > 200)"
+#    cut_dict['event_met_pt'] =  "(pfmet > 125)"
+#    cut_dict['event_met_pt_med'] =  "(pfmet > 125 && pfmet <=200)"
+#    cut_dict['event_met_pt_high'] =  "(pfmet > 200)"
+    cut_dict['event_met_pt'] =  "(new_met > 125)"
+    cut_dict['event_met_pt_med'] =  "(new_met > 125 && new_met <=200)"
+    cut_dict['event_met_pt_high'] =  "(new_met > 200)"
     
     #cut_dict['mt'] =  "mt_met_lep > 150"
     cut_dict['mt'] =  "new_mt > 150"
     
-    cut_dict['mctbb'] =  "new_mct > 170"
     #cut_dict['mctbb'] =  "mct > 170"
+    cut_dict['mctbb'] =  "new_mct > 170"
+    
     
     #Current Ordering of the cut-requirement: (Preselection)
     current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
@@ -190,20 +193,54 @@ def get_cut_dict():
     region_cut_dict["3jet_mct300"] = PSR_cut + "&& mct > 300"
 #    region_cut_dict["3jet_mct350"] = PSR_cut + "&& mct > 350"
     
-    xgb_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
-    "PassTauVeto"]
+    xgb_list = []#["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto", "PassTauVeto"]
     xgb_condition_list = [cut_dict[item] for item in xgb_list]
     xgb_cut = combine_cuts(xgb_condition_list)
     
-#    region_cut_dict["xgb0p6"] = PSR_cut + "&& xgb_proba > 0.6"
-#    region_cut_dict["xgb0p7"] = PSR_cut + "&& xgb_proba > 0.7"
-#    region_cut_dict["xgb0p8"] = PSR_cut + "&& xgb_proba > 0.8"
-#    region_cut_dict["xgb0p9"] = PSR_cut + "&& xgb_proba > 0.9"
-#    region_cut_dict["xgb0p95"] = PSR_cut + "&& xgb_proba > 0.94"
-#    region_cut_dict["xgb0p97"] = PSR_cut + "&& xgb_proba > 0.97"
+#    region_cut_dict["xgb0p6"] = xgb_cut + "&& xgb_proba > 0.6"+"&& xgb_proba <= 0.7"
+#    region_cut_dict["xgb0p7"] = xgb_cut + "&& xgb_proba > 0.7"+"&& xgb_proba <= 0.8"
+#    region_cut_dict["xgb0p8"] = xgb_cut + "&& xgb_proba > 0.8"+"&& xgb_proba <= 0.9"
+#    region_cut_dict["xgb0p9"] = xgb_cut + "&& xgb_proba > 0.9"+"&& xgb_proba <= 0.91"
+#    region_cut_dict["xgb0p91"] = xgb_cut + "&& xgb_proba > 0.91"+"&& xgb_proba <= 0.92"
+#    region_cut_dict["xgb0p92"] = xgb_cut + "&& xgb_proba > 0.92"+"&& xgb_proba <= 0.93"
+    region_cut_dict["xgb0p93"] = xgb_cut + "&& xgb_proba > 0.93"+"&& xgb_proba <= 0.94"
+    region_cut_dict["xgb0p94"] = xgb_cut + "&& xgb_proba > 0.94"+"&& xgb_proba <= 0.942"
+    region_cut_dict["xgb0p942"] = xgb_cut + "&& xgb_proba > 0.942"+"&& xgb_proba <= 0.944"
+    region_cut_dict["xgb0p944"] = xgb_cut + "&& xgb_proba > 0.944"+"&& xgb_proba <= 0.946"
+    region_cut_dict["xgb0p946"] = xgb_cut + "&& xgb_proba > 0.946"+"&& xgb_proba <= 0.948"
+    region_cut_dict["xgb0p948"] = xgb_cut + "&& xgb_proba > 0.948"+"&& xgb_proba <= 0.950"
+    region_cut_dict["xgb0p95"] = xgb_cut + "&& xgb_proba > 0.950"+"&& xgb_proba <= 0.952"
+    region_cut_dict["xgb0p952"] = xgb_cut + "&& xgb_proba > 0.952"+"&& xgb_proba <= 0.954"
+    region_cut_dict["xgb0p954"] = xgb_cut + "&& xgb_proba > 0.954"+"&& xgb_proba <= 0.956"
+    region_cut_dict["xgb0p956"] = xgb_cut + "&& xgb_proba > 0.956"+"&& xgb_proba <= 0.958"
+    region_cut_dict["xgb0p958"] = xgb_cut + "&& xgb_proba > 0.958"+"&& xgb_proba <= 0.960"
+    
+    
     
     return cut_dict, current_cut_list, region_cut_dict
 
+def get_weight_formula():
+    '''Give the weight formula for different types of events.'''
+    weight_form = {}
+    weight_form["normal_sig"] = ""
+    weight_form["normal_bkg"] = ""
+    weight_form["xgb_sig"] = "weight"
+    weight_form["xgb_bkg"] = "weight"
+#if(abs(lep1_pdgid()) == 11){ 
+#    if(lep1_p4().pt()<500) triglep1_sf*= h_trig_el_sf->GetBinContent(h_trig_el_sf->FindBin(lep1_p4().pt()));		
+#    else  triglep1_sf*= h_trig_el_sf->GetBinContent(h_trig_el_sf->FindBin(400));
+#} // end of electron sf
+#else if(abs(lep1_pdgid()) == 13){ 
+#    if(abs(lep1_p4().eta()) < 1.2) {
+#        if(lep1_p4().pt()<500) triglep1_sf*= h_trig_mu_sf_eb->GetBinContent(h_trig_mu_sf_eb->FindBin(lep1_p4().pt()));		
+#        else  triglep1_sf*= h_trig_mu_sf_eb->GetBinContent(h_trig_mu_sf_eb->FindBin(400));
+#    }
+#    else if(abs(lep1_p4().eta()) > 1.2) {
+#        if(lep1_p4().pt()<500) triglep1_sf*= h_trig_mu_sf_ee->GetBinContent(h_trig_mu_sf_ee->FindBin(lep1_p4().pt()));		
+#        else  triglep1_sf*= h_trig_mu_sf_ee->GetBinContent(h_trig_mu_sf_ee->FindBin(400));
+#    }
+#} //end of muon trigger sf
+    
 #BTAGWP, compared to ak4pfjets_CSV[i_jet]
 BTAGWP = 0.5426; #Loose btag working point
 mBTAGWP = 0.8484; #Medium btag working point

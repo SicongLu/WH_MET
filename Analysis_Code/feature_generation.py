@@ -6,6 +6,7 @@ import numpy
 import array
 import math
 import time
+from selection_criteria import get_lep_selection_str
 def feature_generate(file_name, file_name_out):
     '''
     This function shall create useful features to the designated .root file.
@@ -19,7 +20,7 @@ def feature_generate(file_name, file_name_out):
     f = ROOT.TFile(file_name)
     t = f.Get("t")
     f_out = ROOT.TFile(file_name_out, 'recreate' )
-
+    
     #New features branches. MET related.
     new_met = array.array( 'f', [ 0 ] )
     new_met_phi = array.array( 'f', [ 0 ] )
@@ -32,6 +33,21 @@ def feature_generate(file_name, file_name_out):
     new_mct = array.array( 'f', [ 0 ] )
     new_mbb = array.array( 'f', [ 0 ] )
     
+    #Trigger Scalefactor
+    triglep1_sf = array.array( 'f', [ 0 ] )
+    
+    #For those that can be calculated directly in the formula
+    form_dict = {}
+    #Lepton selection evaluation 
+    lep1_tight, lep2_tight, lep1_veto, lep2_veto, ntight_lep_str, nveto_lep_str = get_lep_selection_str()
+    form_dict["lep1_tight"] = lep1_tight
+    form_dict["lep2_tight"] = lep2_tight
+    form_dict["lep1_veto"] = lep1_veto
+    form_dict["lep2_veto"] = lep2_veto
+    form_dict["ntight_lep_str"] = ntight_lep_str
+    form_dict["nveto_lep_str"] = nveto_lep_str
+    
+    #Add Branches    
     t_out = t.CloneTree(0)
     t_out.Branch( 'nbtag_loose', nbtag_loose, 'nbtag_loose/I' )
     t_out.Branch( 'nbtag_med', nbtag_med, 'nbtag_med/I' )
@@ -41,10 +57,28 @@ def feature_generate(file_name, file_name_out):
     t_out.Branch( 'ptbb', ptbb, 'ptbb/F' )
     t_out.Branch( 'new_mct', new_mct, 'new_mct/F' )
     t_out.Branch( 'new_mbb', new_mbb, 'new_mbb/F' )
-    
+
+    eval_dict = {}
+    var_dict = {}
+    for key, item in form_dict.iteritems:
+        var_dict[key] = array.array('f',[0])
+        eval_dict[key] = ROOT.TTreeFormula(key,item,t_out) 
+        t_out.Branch(key, var_dict[key], key+'/F' )
+        
     #Note that the dijet system requires 2 pass loose btag and at least 1 pass med btag.
     BTAGWP = 0.5426; #Loose btag working point
     mBTAGWP = 0.8484; #Medium btag working point
+    
+    #Load weight information
+    f_trig_el_sf = ROOT.TFile.Open("inputhists_moriond17/trigger_el_sf.root","READ");
+    h_trig_el_sf = f_trig_el_sf.Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_el_sf");
+    f_trig_el_sf.Close(); 
+    
+    f_trig_mu_sf = ROOT.TFile.Open("inputhists_moriond17/trigger_mu_sf.root","READ");
+    h_trig_mu_sf_eb = f_trig_mu_sf->Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_mu_sf_eb");
+    h_trig_mu_sf_ee = f_trig_mu_sf->Get("h_pt_effi_ee_ele27WPLoose").Clone("h_trig_mu_sf_ee");#h_trig_mu_sf_eb->SetDirectory(rootdir);
+    f_trig_mu_sf.Close(); 
+    
     event_num = t.GetEntries()
     start_time = time.time()
     print("Total: %.0f events..." % (event_num))
@@ -55,24 +89,6 @@ def feature_generate(file_name, file_name_out):
             print("Processing %.0f events..." % (i_evt))
             print("Estimated minutes left: %.1f..." % minutes_left)            
         t.GetEntry(i_evt)
-        #Re-do the Met related:
-        if "TChiWH_" in file_name:#For fastsim, it is recommended to use the new met. 
-            pfmet_vec = ROOT.TVector3()
-            pfmet_vec.SetPtEtaPhi(t.pfmet, 0, t.pfmet_phi)
-            genmet_vec = ROOT.TVector3()
-            genmet_vec.SetPtEtaPhi(t.genmet, 0, t.genmet_phi)
-            
-            new_met_vec = 1/2.*(pfmet_vec+genmet_vec)
-            new_met[0] = new_met_vec.Pt()
-            new_met_phi[0]  = new_met_vec.Phi()
-            
-            mt_dphi = t.lep1_p4.Phi() -new_met_phi[0]
-            if mt_dphi>math.pi: mt_dphi = 2*math.pi - mt_dphi 
-            
-            new_mt[0] = 2*math.sqrt(t.lep1_p4.Pt()*new_met[0])*abs(math.sin(mt_dphi/2.))
-        else:
-            new_met[0] = t.pfmet
-            new_mt[0] = t.mt_met_lep
         
         #Reconstruction of the two b system.
         nbtag_loose[0] = 0
@@ -120,7 +136,59 @@ def feature_generate(file_name, file_name_out):
             ptbb[0] = di_bjet.Pt()
         #Check consistency in the versions.
         #if ngoodjets!=t.ngoodjets and t.ngoodjets>=0:
-        #    print("Inconsistency in ngoodjets, new: %.0f, old: %.of"%(ngoodjets, t.ngoodjets))            
+        #    print("Inconsistency in ngoodjets, new: %.0f, old: %.of"%(ngoodjets, t.ngoodjets))
+        
+        
+        #Re-do the Met related:
+        if "TChiWH_" in file_name:#For fastsim, it is recommended to use the new met. 
+            pfmet_vec = ROOT.TVector3()
+            pfmet_vec.SetPtEtaPhi(t.pfmet, 0, t.pfmet_phi)
+            genmet_vec = ROOT.TVector3()
+            genmet_vec.SetPtEtaPhi(t.genmet, 0, t.genmet_phi)
+            
+            new_met_vec = 1/2.*(pfmet_vec+genmet_vec)
+            new_met[0] = new_met_vec.Pt()
+            new_met_phi[0]  = new_met_vec.Phi()
+            
+            mt_dphi = t.lep1_p4.Phi() -new_met_phi[0]
+            if mt_dphi>math.pi: mt_dphi = 2*math.pi - mt_dphi 
+            
+            new_mt[0] = 2*math.sqrt(t.lep1_p4.Pt()*new_met[0])*abs(math.sin(mt_dphi/2.))
+        else:
+            new_met[0] = t.pfmet
+            new_mt[0] = t.mt_met_lep
+        
+        #Weight
+        #https://github.com/mialiu149/AnalysisLoopers2015/blob/master/wh_loopers/templateLooper.cc
+        if "TChiWH_" in file_name:
+            triglep1_sf = 1.0
+        else:
+            if abs(t.lep1_pdgid) == 11:
+                if (t.lep1_p4.Pt()<500): 
+                    triglep1_sf = h_trig_el_sf.GetBinContent(\
+                    h_trig_el_sf.FindBin(lep1_p4().pt()));
+                else:
+                    triglep1_sf = h_trig_el_sf.GetBinContent(\
+                    h_trig_el_sf.FindBin(500)) #????????
+            elif abs(t.lep1_pdgid) == 13:
+                if abs(lep1_p4.Eta())<1.2:
+                    if (t.lep1_p4.Pt()<500): 
+                        triglep1_sf = h_trig_mu_sf_eb.GetBinContent(\
+                        h_trig_mu_sf_eb.FindBin(lep1_p4().pt()));
+                    else:
+                        triglep1_sf = h_trig_mu_sf_eb.GetBinContent(\
+                        h_trig_mu_sf_eb.FindBin(500)) #????????
+                else:
+                    if (t.lep1_p4.Pt()<500):  #What 
+                        triglep1_sf = h_trig_mu_sf_ee.GetBinContent(\
+                        h_trig_mu_sf_ee.FindBin(lep1_p4().pt()));
+                    else:
+                        triglep1_sf = h_trig_mu_sf_ee.GetBinContent(\
+                        h_trig_mu_sf_ee.FindBin(500)) #????????
+        #The ones to calculated from formula
+        for key, item in form_dict.iteritems:
+            var_dict[key] = eval_dict[key].EvalInstance()
+
         t_out.Fill()  
     t_out.AutoSave()
     f.Close()

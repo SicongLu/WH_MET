@@ -41,9 +41,10 @@ cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
 condition_list = [cut_dict[item] for item in current_cut_list]
 print(condition_list)
 #Main function
-from create_file_list import get_files
+from create_file_list import get_files, getgrid, generate_scan_dict
+grid_list = generate_scan_dict()
 MC_list = get_files()
-new_location = "../root_file_temp/Sicong_20180228/"
+new_location = "../root_file_temp/Sicong_20180408/"
 
 summary_cutflow_dict = {}
 hist_list = []
