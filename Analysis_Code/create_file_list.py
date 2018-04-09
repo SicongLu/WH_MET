@@ -113,7 +113,7 @@ def generate_scan_dict():
     for point in grid:
         tmp_dict = {}
         tmp_dict["name"] = "(%.0f, %.0f)"%(point[0], point[1])
-        tmp_dict["file_name_list"] = ["TChiWH_%.0f_%.0f.root"%(point[0], point[1])]
+        tmp_dict["file_name_list"] = ["../root_file_temp/Grid_20180404/TChiWH_%.0f_%.0f.root"%(point[0], point[1])]
         grid_list.append(tmp_dict)
         
     return grid_list

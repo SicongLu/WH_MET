@@ -134,11 +134,13 @@ def get_total_file_size(file_list):
     return bytes_num
 
 #Main Function
-from create_file_list import get_files
+from create_file_list import get_files, getgrid, generate_scan_dict
+grid_list = generate_scan_dict()
 MC_list = get_files()
+
 #Get the total file size in order to estimate the run time.
 total_list = []
-for MC in MC_list:
+for MC in grid_list:#MC_list:
     total_list += MC["file_name_list"]
 total_bytes_num = get_total_file_size(total_list)
 print(total_bytes_num*1.0e-6)
@@ -147,7 +149,7 @@ start_time = time.time()
 
 file_location_out = "../root_file_temp/Sicong_20180408/"
 processed_bytes_num = 0
-for MC in MC_list[:]:
+for MC in grid_list:# MC_list[:]:
     MC_name = MC["name"]
     print(MC_name)
     file_name_list = MC["file_name_list"]

@@ -22,7 +22,7 @@ class pandas_analyzer:
         self.features = self.old_features + ["weight"]
         #self.features_name_dict = {"mbb":"M_{bb}"}
         self.csv_location = "../csv_file_temp/"
-        self.root_location = "../root_file_temp/Sicong_20180228/"
+        self.root_location = "../root_file_temp/Sicong_20180408/"
         self.root_out_location = "../root_file_temp/XGB_20180401/"
         self.plot_location = "/home/users/siconglu/CMSTAS/software/niceplots/WH_pandas_analysis/"
         
