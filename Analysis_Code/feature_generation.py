@@ -7,6 +7,58 @@ import array
 import math
 import time
 from selection_criteria import get_lep_selection_str
+def get_triglep1_sf(lep1_pdgid, lep1_p4, h_trig_el_sf, h_trig_mu_sf_eb, h_trig_mu_sf_ee):
+    triglep1_sf = 1.0
+    if abs(lep1_pdgid) == 11:
+        if (lep1_p4.Pt()<500): 
+            triglep1_sf = h_trig_el_sf.GetBinContent(\
+            h_trig_el_sf.FindBin(lep1_p4.pt()));
+        else:
+            triglep1_sf = h_trig_el_sf.GetBinContent(\
+            h_trig_el_sf.FindBin(450)) #The last bin is 400~500
+    elif abs(lep1_pdgid) == 13:
+        if abs(lep1_p4.Eta())<1.2:#Barrel and end-cap
+            if (lep1_p4.Pt()<500): 
+                triglep1_sf = h_trig_mu_sf_eb.GetBinContent(\
+                h_trig_mu_sf_eb.FindBin(lep1_p4.pt()));
+            else:
+                triglep1_sf = h_trig_mu_sf_eb.GetBinContent(\
+                h_trig_mu_sf_eb.FindBin(450)) 
+        else:
+            if (lep1_p4.Pt()<500):  
+                triglep1_sf = h_trig_mu_sf_ee.GetBinContent(\
+                h_trig_mu_sf_ee.FindBin(lep1_p4.pt()));
+            else:
+                triglep1_sf = h_trig_mu_sf_ee.GetBinContent(\
+                h_trig_mu_sf_ee.FindBin(450))
+    return triglep1_sf
+
+def get_triglep1(lep1_pdgid, lep1_p4, lep2_pdgid, lep2_p4, h_trig_el, h_trig_mu_eb, h_trig_mu_ee):
+    '''Currently the 2l is not enabled, need to be fixed!!!'''
+    triglep1 = 1.0
+    if abs(lep1_pdgid) == 11:
+        if (lep1_p4.Pt()<500): 
+            triglep1 = h_trig_el.GetBinContent(\
+            h_trig_el.FindBin(lep1_p4.pt()));
+        else:
+            triglep1 = h_trig_el.GetBinContent(\
+            h_trig_el.FindBin(450)) #The last bin is 400~500
+    elif abs(lep1_pdgid) == 13:
+        if abs(lep1_p4.Eta())<1.2:#Barrel and end-cap
+            if (lep1_p4.Pt()<500): 
+                triglep1 = h_trig_mu_eb.GetBinContent(\
+                h_trig_mu_eb.FindBin(lep1_p4.pt()));
+            else:
+                triglep1 = h_trig_mu_eb.GetBinContent(\
+                h_trig_mu_eb.FindBin(450)) 
+        else:
+            if (lep1_p4.Pt()<500):  
+                triglep1 = h_trig_mu_ee.GetBinContent(\
+                h_trig_mu_ee.FindBin(lep1_p4.pt()));
+            else:
+                triglep1 = h_trig_mu_ee.GetBinContent(\
+                h_trig_mu_ee.FindBin(450))
+    return triglep1
 def feature_generate(file_name, file_name_out):
     '''
     This function shall create useful features to the designated .root file.
@@ -15,6 +67,32 @@ def feature_generate(file_name, file_name_out):
     Note that this function does not do any skimming, so it is rather slow!
     Do not run at work... unless there is a batch system.
     '''
+    #Relevant files loading            
+    #Note that the dijet system requires 2 pass loose btag and at least 1 pass med btag.
+    BTAGWP = 0.5426; #Loose btag working point
+    mBTAGWP = 0.8484; #Medium btag working point
+    
+    #Load weight information
+    weight_hist_location = "/home/users/siconglu/Mia_WH_Analysis/AnalysisLoopers2015/wh_loopers/inputhists_moriond17/"
+    f_trig_el_sf = ROOT.TFile.Open(weight_hist_location+"trigger_el_sf.root","READ");
+    h_trig_el_sf = f_trig_el_sf.Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_el_sf");
+    #f_trig_el_sf.Close(); 
+    
+    f_trig_mu_sf = ROOT.TFile.Open(weight_hist_location+"trigger_mu_sf.root","READ");
+    h_trig_mu_sf_eb = f_trig_mu_sf.Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_mu_sf_eb");
+    h_trig_mu_sf_ee = f_trig_mu_sf.Get("h_pt_effi_ee_ele27WPLoose").Clone("h_trig_mu_sf_ee");#h_trig_mu_sf_eb->SetDirectory(rootdir);
+    #f_trig_mu_sf.Close(); 
+    
+    f_trig_el  = ROOT.TFile.Open(weight_hist_location+"trigeff_El.root","READ");
+    h_trig_el = f_trig_el.Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_el");
+    #f_trig_el .Close(); 
+    
+    f_trig_mu = ROOT.TFile.Open(weight_hist_location+"trigeff_Mu.root","READ");
+    h_trig_mu_eb = f_trig_mu.Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_mu_eb");
+    h_trig_mu_ee = f_trig_mu.Get("h_pt_effi_ee_ele27WPLoose").Clone("h_trig_mu_ee");
+    #f_trig_mu.Close();
+    
+
     #Get Files
     print(file_name)
     f = ROOT.TFile(file_name)
@@ -34,7 +112,7 @@ def feature_generate(file_name, file_name_out):
     new_mbb = array.array( 'f', [ 0 ] )
     
     #Trigger Scalefactor
-    triglep1_sf = array.array( 'f', [ 0 ] )
+    trigeff = array.array( 'f', [ 0 ] )
     
     #For those that can be calculated directly in the formula
     form_dict = {}
@@ -57,27 +135,14 @@ def feature_generate(file_name, file_name_out):
     t_out.Branch( 'ptbb', ptbb, 'ptbb/F' )
     t_out.Branch( 'new_mct', new_mct, 'new_mct/F' )
     t_out.Branch( 'new_mbb', new_mbb, 'new_mbb/F' )
+    t_out.Branch( 'trigeff', trigeff, 'trigeff/F' )
 
     eval_dict = {}
     var_dict = {}
-    for key, item in form_dict.iteritems:
+    for key, item in form_dict.iteritems():
         var_dict[key] = array.array('f',[0])
         eval_dict[key] = ROOT.TTreeFormula(key,item,t_out) 
         t_out.Branch(key, var_dict[key], key+'/F' )
-        
-    #Note that the dijet system requires 2 pass loose btag and at least 1 pass med btag.
-    BTAGWP = 0.5426; #Loose btag working point
-    mBTAGWP = 0.8484; #Medium btag working point
-    
-    #Load weight information
-    f_trig_el_sf = ROOT.TFile.Open("inputhists_moriond17/trigger_el_sf.root","READ");
-    h_trig_el_sf = f_trig_el_sf.Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_el_sf");
-    f_trig_el_sf.Close(); 
-    
-    f_trig_mu_sf = ROOT.TFile.Open("inputhists_moriond17/trigger_mu_sf.root","READ");
-    h_trig_mu_sf_eb = f_trig_mu_sf->Get("h_pt_effi_eb_ele27WPLoose").Clone("h_trig_mu_sf_eb");
-    h_trig_mu_sf_ee = f_trig_mu_sf->Get("h_pt_effi_ee_ele27WPLoose").Clone("h_trig_mu_sf_ee");#h_trig_mu_sf_eb->SetDirectory(rootdir);
-    f_trig_mu_sf.Close(); 
     
     event_num = t.GetEntries()
     start_time = time.time()
@@ -160,34 +225,14 @@ def feature_generate(file_name, file_name_out):
         
         #Weight
         #https://github.com/mialiu149/AnalysisLoopers2015/blob/master/wh_loopers/templateLooper.cc
-        if "TChiWH_" in file_name:
-            triglep1_sf = 1.0
-        else:
-            if abs(t.lep1_pdgid) == 11:
-                if (t.lep1_p4.Pt()<500): 
-                    triglep1_sf = h_trig_el_sf.GetBinContent(\
-                    h_trig_el_sf.FindBin(lep1_p4().pt()));
-                else:
-                    triglep1_sf = h_trig_el_sf.GetBinContent(\
-                    h_trig_el_sf.FindBin(500)) #????????
-            elif abs(t.lep1_pdgid) == 13:
-                if abs(lep1_p4.Eta())<1.2:
-                    if (t.lep1_p4.Pt()<500): 
-                        triglep1_sf = h_trig_mu_sf_eb.GetBinContent(\
-                        h_trig_mu_sf_eb.FindBin(lep1_p4().pt()));
-                    else:
-                        triglep1_sf = h_trig_mu_sf_eb.GetBinContent(\
-                        h_trig_mu_sf_eb.FindBin(500)) #????????
-                else:
-                    if (t.lep1_p4.Pt()<500):  #What 
-                        triglep1_sf = h_trig_mu_sf_ee.GetBinContent(\
-                        h_trig_mu_sf_ee.FindBin(lep1_p4().pt()));
-                    else:
-                        triglep1_sf = h_trig_mu_sf_ee.GetBinContent(\
-                        h_trig_mu_sf_ee.FindBin(500)) #????????
+        if not("TChiWH_" in file_name):#Apply scale factor if HLT_SingleEl/Mu is available
+            trigeff[0] = get_triglep1_sf(t.lep1_pdgid, t.lep1_p4, h_trig_el_sf, h_trig_mu_sf_eb, h_trig_mu_sf_ee)
+        else: #Apply another weight otherwise
+            trigeff[0] = get_triglep1_sf(t.lep1_pdgid, t.lep1_p4, h_trig_el, h_trig_mu_eb, h_trig_mu_ee)                         
+        
         #The ones to calculated from formula
-        for key, item in form_dict.iteritems:
-            var_dict[key] = eval_dict[key].EvalInstance()
+        for key, item in form_dict.iteritems():
+            var_dict[key][0] = eval_dict[key].EvalInstance()
 
         t_out.Fill()  
     t_out.AutoSave()
@@ -208,7 +253,7 @@ MC_list = get_files()
 
 #Get the total file size in order to estimate the run time.
 total_list = []
-for MC in grid_list:#MC_list:
+for MC in grid_list+MC_list:
     total_list += MC["file_name_list"]
 total_bytes_num = get_total_file_size(total_list)
 print(total_bytes_num*1.0e-6)
@@ -217,7 +262,7 @@ start_time = time.time()
 
 file_location_out = "../root_file_temp/Sicong_20180408/"
 processed_bytes_num = 0
-for MC in grid_list:# MC_list[:]:
+for MC in grid_list[:]+MC_list[:]:
     MC_name = MC["name"]
     print(MC_name)
     file_name_list = MC["file_name_list"]
