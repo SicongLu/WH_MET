@@ -17,13 +17,19 @@ class pandas_analyzer:
         '''Set-up the common variables.'''
         print('Setting up analysis')
         self.lumi = 35.9
-        self.old_features = ["mbb", "ngoodjets", "MT2W", "Mlb_closestb", "mct", "mt_met_lep",\
-        "pfmet", "topness", "topnessMod","mindphi_met_j1_j2","scale1fb","ptbb",\        "new_mbb","new_met","new_mt","new_mct"]
-        self.features = self.old_features + ["weight"]
-        #self.features_name_dict = {"mbb":"M_{bb}"}
+        self.old_features = [        
+        "ngoodjets", "MT2W", "Mlb_closestb", "mct", "mt_met_lep",\
+        "pfmet", "topness", "topnessMod","mindphi_met_j1_j2","scale1fb","ptbb",\
+        "new_mbb","new_met","new_mt","new_mct","nbtag_loose","nbtag_med"]
+        
+        self.weight_branch = ["HLT_SingleMu","HLT_SingleEl","PassTrackVeto","PassTauVeto",\
+        "lep1_tight", "lep2_tight", "lep1_veto", "lep2_veto", "ntight_lep_str", "nveto_lep_str",\
+        "xsec","scale1fb","weight_PU","weight_lepSF","weight_btagsf","trigeff"]
+        
+        self.features = self.old_features + self.weight_branch + ["weight"]
         self.csv_location = "../csv_file_temp/"
         self.root_location = "../root_file_temp/Sicong_20180408/"
-        self.root_out_location = "../root_file_temp/XGB_20180401/"
+        self.root_out_location = "../root_file_temp/XGB_20180410/"
         self.plot_location = "/home/users/siconglu/CMSTAS/software/niceplots/WH_pandas_analysis/"
         
     def set_active_branch(self):
@@ -36,18 +42,15 @@ class pandas_analyzer:
                 split_list = re.split('.()',feature)
                 split_list = [item for item in split_list if not(item == "")]
                 for split in split_list:
-                    self.active_branch_list.append(feature)
-        self.weight_branch = ["weight_PU","weight_lepSF","weight_btagsf","xsec","scale1fb",\
-        "HLT_SingleMu","HLT_SingleEl",\
-        "lep1_pdgid","PassTrackVeto","PassTauVeto"]
-        self.active_branch_list = self.active_branch_list + self.weight_branch              
+                    self.active_branch_list.append(feature)              
     def get_weight_str(self, file_name, entry_num):
-        ''''''
+        '''Calculate the relevant weights'''
         lumi = 35.9
         if "TChiWH" in file_name:
-            str_condition = "1*weight_PU*weight_lepSF*weight_btagsf*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(entry_num)
+            str_condition = "1*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(entry_num)
         else:
             str_condition = "1*scale1fb*"+str(lumi)
+        str_condition += "*weight_PU*weight_lepSF*weight_btagsf*trigeff"
         return str_condition
             
     def root_to_df(self,file_name):

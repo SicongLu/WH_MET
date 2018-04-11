@@ -17,7 +17,7 @@ read_list = []
 
 #Get the total file size in order to estimate the run time.
 total_list = []
-for MC in MC_list[:]:#+grid_list[:]:
+for MC in MC_list[:]:#grid_list[:]:#
     total_list += MC["file_name_list"]
 total_bytes_num = get_total_file_size(total_list)
 print(total_bytes_num*1.0e-6)

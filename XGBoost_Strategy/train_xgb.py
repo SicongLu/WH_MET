@@ -22,13 +22,23 @@ class xgb_analyzer:
         self.root_location = "../root_file_temp/Sicong_20180228/"
         self.root_out_location = "../root_file_temp/XGB_20180401/"
         self.plot_location = "/home/users/siconglu/CMSTAS/software/niceplots/WH_pandas_analysis/"
+    def apply_preselection(self, tmp_df):
+        '''Apply some basic prelection for the training samples.'''
+        #1 lep+2 lep veto+2 btag+MET>100+MT>150.
+        preselection = \
+        tmp_df["lep1_tight"]==1)&(tmp_df["lep2_tight"]==0)&(tmp_df["lep2_veto"]==0)\
+        &(tmp_df["PassTrackVeto"]==2)&(tmp_df["PassTauVeto"]>=1)\
+        &(tmp_df["nbtag_loose"]==2)&(tmp_df["nbtag_med"]>=1)\
+        &(tmp_df["new_met"]>100)&(tmp_df["new_mt"]>150)
+        
+        return tmp_df[preselection]
     def prepare_all_data_file(self):
-        #Filename
-        from create_file_list import get_files
+        from create_file_list import get_files, getgrid, generate_scan_dict
+        grid_list = generate_scan_dict()
         MC_list = get_files()
         sig_file_name_list = []#sig_file_name_list = ["TChiWH_700_1"]
         bkg_file_name_list = []#bkg_file_name_list = ["ttbar_diLept_madgraph_pythia8_25ns_1",]        
-        for MC in MC_list:
+        for MC in MC_list+grid_list:
             print(MC['name'])
             for file_name in MC['file_name_list']:
                 file_name = file_name[file_name.rfind("/")+1:]
@@ -37,32 +47,40 @@ class xgb_analyzer:
                 if "(" in MC['name']:
                     sig_file_name_list.append(file_name)
                 else:
-                    if ("WZTo2L2Q" in file_name): break
                     bkg_file_name_list.append(file_name)        
-        df_list = []        
+        df_list = []
         for file_name in sig_file_name_list:
-            tmp_df = read_df_from_csv(file_name,2000)
+            tmp_df = read_df_from_csv(file_name)
+            tmp_df = apply_preselection(tmp_df)
             tmp_df["MC_ID"] = 1 #Denote signal with 1 bkg with 0.
             df_list.append(tmp_df)
         
         for file_name in bkg_file_name_list:
-            tmp_df = read_df_from_csv(file_name,200)
+            tmp_df = read_df_from_csv(file_name) #Add a number n to read the first n rows.
+            tmp_df = apply_preselection(tmp_df)
             tmp_df["MC_ID"] = 0
             df_list.append(tmp_df)
         self.df = pd.concat(df_list)
         self.label = self.df['MC_ID']
         
-    def reweight_dataframe(self):
+    def reweight_dataframe_uniformly(self):
         '''Reweight so that signal and background have the same total yield.'''
         sig_num = len(self.df[self.df['MC_ID']==1])
         bkg_num = len(self.df[self.df['MC_ID']==0])  
         self.df.loc[self.df['MC_ID'] == 1, 'weight'] = 1.0*sig_num/sig_num
         self.df.loc[self.df['MC_ID'] == 0, 'weight'] = 1.0*sig_num/bkg_num
         print("Reading: %.0f sig events, %.0f bkg events."%(sig_num, bkg_num))
+    def reweight_dataframe(self):
+        '''Reweight so that signal and background have the same total yield.'''
+        sig_num = self.df.loc[self.df['MC_ID'] == 1, 'weight'].sum() 
+        bkg_num = self.df.loc[self.df['MC_ID'] == 0, 'weight'].sum()  
+        self.df.loc[self.df['MC_ID'] == 1, 'weight'] *= 1.0*sig_num/sig_num
+        self.df.loc[self.df['MC_ID'] == 0, 'weight'] *= 1.0*sig_num/bkg_num
+        print("Reading the yield: %.2f sig events, %.2f bkg events."%(sig_num, bkg_num))
     
     def xgb_training(self):
         '''Trim unnecessary variables.'''    
-        self.used_var_list = ["ngoodjets","mct","mt_met_lep","mbb","pfmet","weight"]
+        self.used_var_list = ["ngoodjets","new_mct","new_mt","new_mbb","new_met","weight"]
         var_file = open("used_vars_list.txt","w")
         print("Using the following variables:")
         for var in self.used_var_list:
