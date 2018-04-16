@@ -6,12 +6,10 @@
 RUNDIR=/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src
 #INDIR=${RUNDIR}/WH_MET_limitsetting/cards_40fb_v8
 #OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan40fbv9
-#
 #declare -a samples=(`cat $INDIR/points_tchwh.txt`)
-
-INDIR=${RUNDIR}/WH_MET_limitsetting/cards_test_04_09
-OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan_test_04_09
-
+#_3jets
+INDIR=${RUNDIR}/WH_MET_limitsetting/cards_test_04_13
+OUTDIR=${RUNDIR}/WH_MET_limitsetting/scan_test_04_13
 declare -a samples=(`cat cards/points_tchwh.txt`)
 
 #The samples is the filenames that is stored in points_tchwh.txt.
