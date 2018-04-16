@@ -14,14 +14,7 @@ class xgb_analyzer:
         '''Set-up the common variables.'''
         print('Setting up analysis')
         self.lumi = 35.9
-        self.old_features = ["mbb", "ngoodjets", "MT2W", "Mlb_closestb", "mct", "mt_met_lep",\
-        "pfmet", "topness", "topnessMod","mindphi_met_j1_j2","scale1fb","ptbb"]
-        self.features = self.old_features + ["weight"]
-        #self.features_name_dict = {"mbb":"M_{bb}"}
         self.csv_location = "../csv_file_temp/"
-        self.root_location = "../root_file_temp/Sicong_20180228/"
-        self.root_out_location = "../root_file_temp/XGB_20180401/"
-        self.plot_location = "/home/users/siconglu/CMSTAS/software/niceplots/WH_pandas_analysis/"
     def apply_preselection(self, tmp_df):
         '''Apply some basic prelection for the training samples.'''
         #1 lep+2 lep veto+2 btag+MET>100+MT>150.
@@ -110,9 +103,10 @@ class xgb_analyzer:
         
         #Set-up training variables
         params = {"objective":"multi:softprob", "num_class": 2, "max_depth":5, "silent":1, "eta":0.01, \
-        "n_estimators":1000}#,"min_child_weight":0.001 
-        num_rounds = 1000
+        "n_estimators":10,"nthread":2}#,"min_child_weight":0.001  #Note that we need to limit the number of cores.
+        num_rounds = 200
         watchlist = [(dtest,'test'),(dtrain,'train')]
+
         bst = xgb.train(params, dtrain, num_rounds, watchlist)
         bst.save_model("xgb_model_0412_uniform_weight.xgb")
         self.model = bst 
@@ -129,7 +123,8 @@ class xgb_analyzer:
         #plt.show()
         #xgb.plot_tree(bst, num_trees=2)
         #xgb.to_graphviz(bst, num_trees=2)
+
 a = xgb_analyzer()
 a.prepare_all_data_file()
-a.reweight_dataframe_uniformly()
+#a.reweight_dataframe_uniformly()
 a.xgb_training()

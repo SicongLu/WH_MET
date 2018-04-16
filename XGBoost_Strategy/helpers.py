@@ -43,7 +43,6 @@ def plot_overtrain(y_train, y_test, y_train_pred, y_test_pred, w_train, w_test, 
     canvas.SetTopMargin(0.05);
     canvas.SetBottomMargin(0.16);
     canvas.SetFrameBorderMode(0);
-    canvas.SetLogy();
     
     yaxis = h_sig_train.GetYaxis()
     xaxis = h_sig_train.GetXaxis()

@@ -10,6 +10,7 @@ import sys
 from root_numpy import array2tree, array2root, tree2array
 from helpers import read_df_from_csv
 import xgboost as xgb
+import multiprocessing as mp
 sys.path.insert(0, '/home/users/siconglu/CMSTAS/software/dataMCplotMaker/')
 import dataMCplotMaker
 
@@ -53,7 +54,7 @@ class pandas_analyzer:
         self.features = self.old_features + self.weight_branch + ["weight"]
         self.csv_location = "../csv_file_temp/"
         self.root_location = "../root_file_temp/Sicong_20180408/"
-        self.root_out_location = "../root_file_temp/XGB_20180410/"
+        self.root_out_location = "../root_file_temp/XGB_20180416/"
         self.plot_location = "/home/users/siconglu/CMSTAS/software/niceplots/WH_pandas_analysis/"
         
     def set_active_branch(self):
@@ -177,7 +178,7 @@ class pandas_analyzer:
         array_type_list = [(column, float) for column in self.tmp_df.columns[1:]]
         tmp_array = np.delete(self.tmp_df.values,0,1) #Delete the first column, which is the indices
         tmp_array = tmp_array.flatten().view(dtype=array_type_list)
-        array2root(tmp_array, out_file, 't') #Directly save to the file, array, filename, treename
+        array2root(tmp_array, out_file, 't', mode='recreate') #Directly save to the file, array, filename, treename, with mode = "recreate" or "update"
     def load_csv(self,file_name):
         '''Directly read data from csv to save time.'''
         self.tmp_df = read_df_from_csv(file_name)
@@ -185,7 +186,7 @@ class pandas_analyzer:
             self.tmp_df_name = file_name[:file_name.rfind(".")]
         else:
             self.tmp_df_name = file_name
-    def load_xgb_model(self):
+    def load_xgb_model(self, model_file):
         '''Load relevant xgb information for applying the xgb probability.'''
         self.used_var_list = []
         var_file = open("used_vars_list.txt","r")
@@ -193,8 +194,7 @@ class pandas_analyzer:
         for line in var_file:
             var = line.replace("\n","")
             self.used_var_list.append(var)
-            print(var)
-        model_file = "xgb_model_0412.xgb"
+            print(var) 
         print("Loading Model:"+model_file)
         self.model = xgb.Booster()
         self.model.load_model(model_file)
@@ -206,7 +206,45 @@ class pandas_analyzer:
         y = self.model.predict(X)
         sig_prob = y[:,1] #Get the second column which represents the signal
         self.tmp_df["xgb_proba"] = sig_prob
+    def run_assign_xgb_prob(self,file_name):
+        '''Single process assigning the scores.
+        This is a merely a temporary practice, will modify the other relevant codes
+        if it proved to be useful.
+        '''
+        tmp_df = read_df_from_csv(file_name)
+        if "." in file_name:
+            tmp_df_name = file_name[:file_name.rfind(".")]
+        else:
+            tmp_df_name = file_name
+        X = tmp_df[self.used_var_list].values
+        X = xgb.DMatrix(X, missing=-999.0)
+        y = self.model.predict(X)
+        sig_prob = y[:,1] #Get the second column which represents the signal
+        tmp_df["xgb_proba"] = sig_prob
         
+        out_file = self.root_out_location+tmp_df_name+".root"
+        print("Writing the temporary dataframe to .root file to: \n "+out_file)
+        array_type_list = [(column, float) for column in tmp_df.columns[1:]]
+        tmp_array = np.delete(tmp_df.values,0,1) #Delete the first column, which is the indices
+        tmp_array = tmp_array.flatten().view(dtype=array_type_list)
+        array2root(tmp_array, out_file, 't', mode='recreate') #Directly save to the file, array, filename, treename, with mode = "recreate" or "update"
+        
+    def multiprocessing(self, file_list, num_cores):
+        '''Test if we can use multiprocessing to save time.'''
+        processed_list = []
+        num_rounds = int(math.ceil(1.0*len(file_list)/num_cores))
+        print("Number of rounds:%.0f"%num_rounds)
+        for round_i in range(num_rounds):
+            processes = []
+            num_left = len(file_list)-len(processed_list)
+            for file_name in file_list[round_i*num_cores:round_i*num_cores+min(num_cores, num_left)]:
+                p = mp.Process(target=self.run_assign_xgb_prob, args=(file_name,))
+                processes.append(p)
+                processed_list.append(file_name)
+            [x.start() for x in processes]
+            print("Starting %.0f process simultaneously."%num_cores)
+            [x.join() for x in processes]
+            print("%.0f processes have been completed."%len(processed_list))
         
         
         
