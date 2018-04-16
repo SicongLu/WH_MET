@@ -18,19 +18,34 @@ def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
         weight = weight_form.EvalInstance()
         if weight == 0:
             continue        
-        p4_list = t.genqs_p4
+        gen_p4_list = t.genqs_p4
+        gen_pT_list = [p4.Pt() for p4 in gen_p4_list] 
+        gen_pT_list = sorted(gen_pT_list, reverse=True)
+        
+        p4_list = t.ak4pfjets_p4
         pT_list = [p4.Pt() for p4 in p4_list] 
         pT_list = sorted(pT_list, reverse=True)
         if var_name == "genqs_1st_pT":
+            if len(gen_pT_list)>=1:
+                value = gen_pT_list[0]
+            else:
+                value = -999
+        elif var_name == "genqs_2nd_pT":
+            if len(gen_pT_list)>=2:
+                value = gen_pT_list[1]
+            else:
+                value = -999
+        elif var_name == "ak4pf_1st_pT":
             if len(pT_list)>=1:
                 value = pT_list[0]
             else:
                 value = -999
-        elif var_name == "genqs_2nd_pT":
+        elif var_name == "ak4pf_2nd_pT":
             if len(pT_list)>=2:
                 value = pT_list[1]
             else:
                 value = -999
+
         myhist.Fill(value, weight)
     
     print(myhist.Integral())
@@ -51,7 +66,7 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
     MC_list = get_files()
     hist_list = []
     name_list = []
-    new_location = "../root_file_temp/Sicong_20180228/"
+    new_location = "../root_file_temp/Sicong_20180408/"
     for MC in [MC_list[index] for index in sample_index_list]:
         MC_name = MC["name"]
         file_name_list = MC["file_name_list"]
@@ -110,12 +125,14 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
 plot_dict_list = [
 {"var_name":"genqs_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
 {"var_name":"genqs_2nd_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
+{"var_name":"ak4pf_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
+{"var_name":"ak4pf_2nd_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
 ]
 
 #Common set-up 
 lumi = 35.9
 #plot_folder_name = "WH_Comparison_20180321_alljets/"
-plot_folder_name = "WH_Comparison_20180326_1jet/"
+plot_folder_name = "WH_Comparison_20180411_1jet/"
 #plot_folder_name = "WH_Comparison_20180315_2jet/"
 
 sample_index_list = [1, 2, 3, 4, 5, 6]

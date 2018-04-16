@@ -260,10 +260,14 @@ print(total_bytes_num*1.0e-6)
 print("Total file size to be processed: %.1f Mb"%(total_bytes_num*1.0e-6))
 start_time = time.time()
 
+skim_questionable_list = ["(225, 75)", "(250, 1)", "(350, 100)", "(500, 1)", "(500, 125)", "(700, 1)"]
+
 file_location_out = "../root_file_temp/Sicong_20180408/"
 processed_bytes_num = 0
-for MC in grid_list[:]+MC_list[:]:
+for MC in grid_list[:]+MC_list[0:0]:
     MC_name = MC["name"]
+    if not(MC_name in skim_questionable_list):
+        continue; 
     print(MC_name)
     file_name_list = MC["file_name_list"]
     for file_name in file_name_list:

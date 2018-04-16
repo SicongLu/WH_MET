@@ -4,10 +4,16 @@ import array
 ROOT.gStyle.SetOptStat(0);
 ROOT.gStyle.SetOptTitle(0);
 
+def get_weight_str(file_name, entry_num):
+    '''Calculate the relevant weights'''
+    return "weight"
+
 def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
     #print(file_name, var_name, str_condition, bin_num, xmin, xmax)
     f = ROOT.TFile(file_name)
     t = f.Get("t")
+    weight_str = get_weight_str(file_name, t.GetEntries())
+    str_condition = "("+str_condition+")*"+weight_str
     myhist = ROOT.TH1F("myhist","myhist",bin_num,xmin,xmax);
     t.Draw(var_name+">>myhist",str_condition,"goff")
     
@@ -29,7 +35,8 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
     MC_list = get_files()
     hist_list = []
     name_list = []
-    new_location = "../root_file_temp/Sicong_20180228/"
+    #new_location = "../root_file_temp/Sicong_20180408/"
+    new_location = "../root_file_temp/XGB_20180410/"
     for MC in [MC_list[index] for index in sample_index_list]:
         MC_name = MC["name"]
         file_name_list = MC["file_name_list"]
@@ -86,30 +93,32 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
 
 #Basic Set-up
 #Other relevant set-up
-plot_dict_list = [#{"var_name":"ptbb", "xmin":20, "xmax":600, "bin_num": 40},\
-{"var_name":"mbb", "xmin":80, "xmax":180, "bin_num": 20},\
+plot_dict_list = [{"var_name":"ptbb", "xmin":20, "xmax":600, "bin_num": 40},\
+{"var_name":"new_mbb", "xmin":80, "xmax":180, "bin_num": 20},\
 {"var_name":"ngoodjets", "xmin":0, "xmax":10, "bin_num": 10},\
-#{"var_name":"genbosons_id", "xmin":15, "xmax":30, "bin_num": 15},\
-#{"var_name":"genbosons_p4.fCoordinates.M()", "xmin":50, "xmax":150, "bin_num": 25},\
-#{"var_name":"genbosons_p4.fCoordinates.M()*(genbosons_id==25)", "xmin":50, "xmax":150, "bin_num": 25},\
-{"var_name":"genbosons_p4.fCoordinates.Pt()*(genbosons_id==25)", "xmin":25, "xmax":1000, "bin_num": 25},\
-#{"var_name":"ak4pfjets_p4[0].fCoordinates.Pt()", "xmin":25, "xmax":1000, "bin_num": 25},\
-#{"var_name":"genqs_p4[0].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
-#{"var_name":"genqs_p4[1].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
-#{"var_name":"genqs_p4[2].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
-{"var_name":"mct", "xmin":0, "xmax":800, "bin_num": 20},\
-{"var_name":"pfmet", "xmin":0, "xmax":800, "bin_num": 30},\
-{"var_name":"mt_met_lep", "xmin":10, "xmax":600, "bin_num": 20},\
-{"var_name":"MT2W", "xmin":20, "xmax":600, "bin_num": 20},\
-{"var_name":"Mlb_closestb", "xmin":10, "xmax":500, "bin_num": 20},\
-{"var_name":"topness", "xmin":-10, "xmax":10, "bin_num": 20},\
-{"var_name":"topnessMod", "xmin":-10, "xmax":10, "bin_num": 20},\
-{"var_name":"mindphi_met_j1_j2", "xmin":0, "xmax":5, "bin_num": 20},\
-#{"var_name":"mbb*(ptbb>500)", "xmin":50, "xmax":200, "bin_num": 20},\
-{"var_name":"ak4_htratiom", "xmin":0, "xmax":1, "bin_num": 20},\
+##{"var_name":"genbosons_id", "xmin":15, "xmax":30, "bin_num": 15},\
+##{"var_name":"genbosons_p4.fCoordinates.M()", "xmin":50, "xmax":150, "bin_num": 25},\
+##{"var_name":"genbosons_p4.fCoordinates.M()*(genbosons_id==25)", "xmin":50, "xmax":150, "bin_num": 25},\
+#{"var_name":"genbosons_p4.fCoordinates.Pt()*(genbosons_id==25)", "xmin":25, "xmax":1000, "bin_num": 25},\
+##{"var_name":"ak4pfjets_p4[0].fCoordinates.Pt()", "xmin":25, "xmax":1000, "bin_num": 25},\
+##{"var_name":"genqs_p4[0].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
+##{"var_name":"genqs_p4[1].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
+##{"var_name":"genqs_p4[2].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
+{"var_name":"new_mct", "xmin":0, "xmax":800, "bin_num": 20},\
+{"var_name":"new_met", "xmin":0, "xmax":800, "bin_num": 30},\
+{"var_name":"new_mt", "xmin":10, "xmax":600, "bin_num": 20},\
+#{"var_name":"MT2W", "xmin":20, "xmax":600, "bin_num": 20},\
+#{"var_name":"Mlb_closestb", "xmin":10, "xmax":500, "bin_num": 20},\
+#{"var_name":"topness", "xmin":-10, "xmax":10, "bin_num": 20},\
+#{"var_name":"topnessMod", "xmin":-10, "xmax":10, "bin_num": 20},\
+#{"var_name":"mindphi_met_j1_j2", "xmin":0, "xmax":5, "bin_num": 20},\
+##{"var_name":"mbb*(ptbb>500)", "xmin":50, "xmax":200, "bin_num": 20},\
+#{"var_name":"ak4_htratiom", "xmin":0, "xmax":1, "bin_num": 20},\
+#
+#{"var_name":"lep1_p4.fCoordinates.Pt()", "xmin":10, "xmax":400, "bin_num": 20},\
+#{"var_name":"ak4pfjets_p4.fCoordinates.Pt()*(ak4pfjets_CSV > 0.5426)", "xmin":10, "xmax":200, "bin_num": 20},\
+{"var_name":"xgb_proba", "xmin":0, "xmax":1, "bin_num": 40},\
 
-{"var_name":"lep1_p4.fCoordinates.Pt()", "xmin":10, "xmax":400, "bin_num": 20},\
-{"var_name":"ak4pfjets_p4.fCoordinates.Pt()*(ak4pfjets_CSV > 0.5426)", "xmin":10, "xmax":200, "bin_num": 20},\
 ]
 
 #Common set-up 
@@ -117,13 +126,15 @@ lumi = 35.9
 #plot_folder_name = "WH_Comparison_20180321_alljets/"
 #plot_folder_name = "WH_Comparison_20180315_1jet/"
 #plot_folder_name = "WH_Comparison_20180315_2jet/"
-plot_folder_name = "WH_Comparison_20180327_3jet_PSR/"
+#region_str = "PSR3jet_met_200_mct250"
+region_str = "SR2"
+region_str = "xgb0p6"
+plot_folder_name = "WH_Comparison_20180412"+region_str+"/"
+
 
 sample_index_list = [1, 2, 3, 4, 5, 6]
-sample_index_list = [4,5,6,7,9,10]
-#sample_index_list = [4,5,6]
-#MC_multi = 300
-MC_multi = 3
+sample_index_list = [4,5,6,7,8,9,10]
+MC_multi = 10
 #Cut-Conditions
 from selection_criteria import get_cut_dict, combine_cuts
 cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
@@ -137,8 +148,8 @@ cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
 #str_condition = combine_cuts(current_condition_list)
 #str_condition +="&& ngoodjets == 1"
 #str_condition +="&& ngoodjets == 2"
-str_condition = region_cut_dict["3jet_mct225"]
-str_condition = "("+str_condition+")*scale1fb*"+str(lumi)
+str_condition = region_cut_dict[region_str]
+print(str_condition)
 #Plotting
 for plot_dict in plot_dict_list:
     print(plot_dict)

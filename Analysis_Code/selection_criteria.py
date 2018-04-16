@@ -71,11 +71,15 @@ def get_cut_dict():
     '''
     lep1_tight, lep2_tight, lep1_veto, lep2_veto, ntight_lep_str, nveto_lep_str = get_lep_selection_str()
     cut_dict = {}
+    #cut_dict['passTrigger'] = "(HLT_SingleMu>0 || HLT_SingleEl>0)"
     cut_dict['passTrigger'] = "(HLT_SingleMu || HLT_SingleEl)"
-    cut_dict['passOneLep'] = lep1_tight 
-    cut_dict['passLepSel'] = "!("+lep2_veto+"||"+lep2_tight+")"
-    cut_dict['passTwoLep'] = lep1_tight+"&&"+lep2_tight 
-    
+    #cut_dict['passOneLep'] = lep1_tight
+    #cut_dict['passLepSel'] = "!("+lep2_veto+"||"+lep2_tight+")"
+    #cut_dict['passTwoLep'] = lep1_tight+"&&"+lep2_tight
+    cut_dict['passOneLep'] = "lep1_tight == 1"
+    cut_dict['passLepSel'] = "!(lep2_veto||lep2_tight)"
+    cut_dict['passTwoLep'] = "lep1_tight && lep2_tight"
+
     cut_dict['PassTrackVeto'] = "PassTrackVeto == 1"
     cut_dict['PassTauVeto'] = "PassTauVeto == 1"
     cut_dict['inverted_PassTrackVeto'] = "PassTrackVeto == 0"
@@ -83,6 +87,7 @@ def get_cut_dict():
     
     cut_dict['ngoodjets'] = "ngoodjets == 2"
     cut_dict['3goodjets'] = "ngoodjets == 3"
+    cut_dict['4moregoodjets'] = "ngoodjets >= 4"
     cut_dict['2ormoregoodjets'] = "ngoodjets >= 2"
     
     cut_dict['goodbtags'] = "nbtag_loose == 2 && nbtag_med >= 1"
@@ -105,7 +110,6 @@ def get_cut_dict():
     
     #cut_dict['mctbb'] =  "mct > 170"
     cut_dict['mctbb'] =  "new_mct > 170"
-    
     
     #Current Ordering of the cut-requirement: (Preselection)
     current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
@@ -174,48 +178,71 @@ def get_cut_dict():
     PSR_condition_list = [cut_dict[item] for item in PSR_list]
     PSR_cut = combine_cuts(PSR_condition_list)
     
-#    region_cut_dict["3jet_met_200_mct200"] = PSR_cut + "&& mct > 200"
-    region_cut_dict["3jet_met_200_mct225"] = PSR_cut + "&& mct > 225"
-    region_cut_dict["3jet_met_200_mct250"] = PSR_cut + "&& mct > 250"
-#    region_cut_dict["3jet_met_200_mct275"] = PSR_cut + "&& mct > 275"
-#    region_cut_dict["3jet_met_200_mct300"] = PSR_cut + "&& mct > 300"
+#    region_cut_dict["PSR3jet_met_200_mct200"] = PSR_cut + "&& new_mct > 200"
+    region_cut_dict["PSR3jet_met_200_mct225"] = PSR_cut + "&& new_mct > 225"
+    region_cut_dict["PSR3jet_met_200_mct250"] = PSR_cut + "&& new_mct > 250"
+    region_cut_dict["PSR3jet_met_200_mct275"] = PSR_cut + "&& new_mct > 275"
+#    region_cut_dict["PSR3jet_met_200_mct300"] = PSR_cut + "&& new_mct > 300"
         
     
     PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "3goodjets", "goodbtags", "m_bb", "event_met_pt", "mt"]
     PSR_condition_list = [cut_dict[item] for item in PSR_list]
     PSR_cut = combine_cuts(PSR_condition_list)
-
-#    region_cut_dict["3jet_mct200"] = PSR_cut + "&& mct > 200"
-#    region_cut_dict["3jet_mct225"] = PSR_cut + "&& mct > 225"
-#    region_cut_dict["3jet_mct250"] = PSR_cut + "&& mct > 250"
-    region_cut_dict["3jet_mct275"] = PSR_cut + "&& mct > 275"
-    region_cut_dict["3jet_mct300"] = PSR_cut + "&& mct > 300"
-#    region_cut_dict["3jet_mct350"] = PSR_cut + "&& mct > 350"
+#    region_cut_dict["PSR3jet_mct200"] = PSR_cut + "&& new_mct > 200"
+#    region_cut_dict["PSR3jet_mct225"] = PSR_cut + "&& new_mct > 225"
+#    region_cut_dict["PSR3jet_mct250"] = PSR_cut + "&& new_mct > 250"
+    region_cut_dict["PSR3jet_mct275"] = PSR_cut + "&& new_mct > 275"
+    region_cut_dict["PSR3jet_mct300"] = PSR_cut + "&& new_mct > 300"
+#    region_cut_dict["PSR3jet_mct350"] = PSR_cut + "&& new_mct > 350"
+   
+    #Proposed SR with 4 jets
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "4moregoodjets", "goodbtags", "m_bb", "event_met_pt_high", "mt"]
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    region_cut_dict["PSR4jet_met_200_mct200"] = PSR_cut + "&& new_mct > 200"
+    region_cut_dict["PSR4jet_met_200_mct225"] = PSR_cut + "&& new_mct > 225"
+    region_cut_dict["PSR4jet_met_200_mct250"] = PSR_cut + "&& new_mct > 250"
+    region_cut_dict["PSR4jet_met_200_mct275"] = PSR_cut + "&& new_mct > 275"
+    region_cut_dict["PSR4jet_met_200_mct300"] = PSR_cut + "&& new_mct > 300"    
+    PSR_cut = combine_cuts(PSR_condition_list)
     
-    xgb_list = []#["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto", "PassTauVeto"]
+    #Proposed SR with 4 jets
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "4moregoodjets", "goodbtags", "m_bb", "event_met_pt", "mt"]
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    region_cut_dict["PSR4jet_met_125_mct200"] = PSR_cut + "&& new_mct > 200"
+    region_cut_dict["PSR4jet_met_125_mct225"] = PSR_cut + "&& new_mct > 225"
+    region_cut_dict["PSR4jet_met_125_mct250"] = PSR_cut + "&& new_mct > 250"
+    region_cut_dict["PSR4jet_met_125_mct275"] = PSR_cut + "&& new_mct > 275"
+    region_cut_dict["PSR4jet_met_125_mct300"] = PSR_cut + "&& new_mct > 300"    
+    PSR_cut = combine_cuts(PSR_condition_list)
+    
+    xgb_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto", "PassTauVeto", "goodbtags"]
+    #preselection_str = "lep1_tight == 1 && lep2_tight == 0 && lep2_veto == 0 && PassTrackVeto && PassTauVeto && nbtag_loose ==2 && nbtag_med >=1 && new_met>100&& new_mt>150"
     xgb_condition_list = [cut_dict[item] for item in xgb_list]
-    xgb_cut = combine_cuts(xgb_condition_list)
+    xgb_cut = combine_cuts(xgb_condition_list) + "&& new_met>100 && new_mt>150"
     
-#    region_cut_dict["xgb0p6"] = xgb_cut + "&& xgb_proba > 0.6"+"&& xgb_proba <= 0.7"
-#    region_cut_dict["xgb0p7"] = xgb_cut + "&& xgb_proba > 0.7"+"&& xgb_proba <= 0.8"
-#    region_cut_dict["xgb0p8"] = xgb_cut + "&& xgb_proba > 0.8"+"&& xgb_proba <= 0.9"
-#    region_cut_dict["xgb0p9"] = xgb_cut + "&& xgb_proba > 0.9"+"&& xgb_proba <= 0.91"
-#    region_cut_dict["xgb0p91"] = xgb_cut + "&& xgb_proba > 0.91"+"&& xgb_proba <= 0.92"
-#    region_cut_dict["xgb0p92"] = xgb_cut + "&& xgb_proba > 0.92"+"&& xgb_proba <= 0.93"
+    region_cut_dict["xgb0p6"] = xgb_cut + "&& xgb_proba > 0.6"
+    region_cut_dict["xgb0p7"] = xgb_cut + "&& xgb_proba > 0.7"
+    region_cut_dict["xgb0p8"] = xgb_cut + "&& xgb_proba > 0.8"+"&& xgb_proba <= 0.9"
+    region_cut_dict["xgb0p9"] = xgb_cut + "&& xgb_proba > 0.9"+"&& xgb_proba <= 0.91"
+    region_cut_dict["xgb0p91"] = xgb_cut + "&& xgb_proba > 0.91"+"&& xgb_proba <= 0.92"
+    region_cut_dict["xgb0p92"] = xgb_cut + "&& xgb_proba > 0.92"+"&& xgb_proba <= 0.93"
     region_cut_dict["xgb0p93"] = xgb_cut + "&& xgb_proba > 0.93"+"&& xgb_proba <= 0.94"
-    region_cut_dict["xgb0p94"] = xgb_cut + "&& xgb_proba > 0.94"+"&& xgb_proba <= 0.942"
-    region_cut_dict["xgb0p942"] = xgb_cut + "&& xgb_proba > 0.942"+"&& xgb_proba <= 0.944"
-    region_cut_dict["xgb0p944"] = xgb_cut + "&& xgb_proba > 0.944"+"&& xgb_proba <= 0.946"
-    region_cut_dict["xgb0p946"] = xgb_cut + "&& xgb_proba > 0.946"+"&& xgb_proba <= 0.948"
-    region_cut_dict["xgb0p948"] = xgb_cut + "&& xgb_proba > 0.948"+"&& xgb_proba <= 0.950"
-    region_cut_dict["xgb0p95"] = xgb_cut + "&& xgb_proba > 0.950"+"&& xgb_proba <= 0.952"
-    region_cut_dict["xgb0p952"] = xgb_cut + "&& xgb_proba > 0.952"+"&& xgb_proba <= 0.954"
-    region_cut_dict["xgb0p954"] = xgb_cut + "&& xgb_proba > 0.954"+"&& xgb_proba <= 0.956"
-    region_cut_dict["xgb0p956"] = xgb_cut + "&& xgb_proba > 0.956"+"&& xgb_proba <= 0.958"
-    region_cut_dict["xgb0p958"] = xgb_cut + "&& xgb_proba > 0.958"+"&& xgb_proba <= 0.960"
-    
-    
+    region_cut_dict["xgb0p94"] = xgb_cut + "&& xgb_proba > 0.94"+"&& xgb_proba <= 0.95"
+    region_cut_dict["xgb0p95"] = xgb_cut + "&& xgb_proba > 0.95"+"&& xgb_proba <= 0.96"
+    region_cut_dict["xgb0p96"] = xgb_cut + "&& xgb_proba > 0.96"+"&& xgb_proba <= 0.97"
+    region_cut_dict["xgb0p97"] = xgb_cut + "&& xgb_proba > 0.97"+"&& xgb_proba <= 0.972"
+    region_cut_dict["xgb0p972"] = xgb_cut + "&& xgb_proba > 0.972"+"&& xgb_proba <= 0.974"
+    region_cut_dict["xgb0p974"] = xgb_cut + "&& xgb_proba > 0.974"+"&& xgb_proba <= 0.976"
+    region_cut_dict["xgb0p976"] = xgb_cut + "&& xgb_proba > 0.976"+"&& xgb_proba <= 0.978"
+    region_cut_dict["xgb0p978"] = xgb_cut + "&& xgb_proba > 0.978"+"&& xgb_proba <= 0.980"
+    region_cut_dict["xgb0p98"] = xgb_cut + "&& xgb_proba > 0.980"+"&& xgb_proba <= 0.982"
+    region_cut_dict["xgb0p982"] = xgb_cut + "&& xgb_proba > 0.982"+"&& xgb_proba <= 0.984"
+    region_cut_dict["xgb0p984"] = xgb_cut + "&& xgb_proba > 0.984"+"&& xgb_proba <= 0.986"
+    region_cut_dict["xgb0p986"] = xgb_cut + "&& xgb_proba > 0.986"+"&& xgb_proba <= 0.988"
+    region_cut_dict["xgb0p988"] = xgb_cut + "&& xgb_proba > 0.988"+"&& xgb_proba <= 1.00"
     
     return cut_dict, current_cut_list, region_cut_dict
 
