@@ -43,6 +43,7 @@ def plot_overtrain(y_train, y_test, y_train_pred, y_test_pred, w_train, w_test, 
     canvas.SetTopMargin(0.05);
     canvas.SetBottomMargin(0.16);
     canvas.SetFrameBorderMode(0);
+    canvas.SetLogy();
     
     yaxis = h_sig_train.GetYaxis()
     xaxis = h_sig_train.GetXaxis()
@@ -67,7 +68,7 @@ def plot_overtrain(y_train, y_test, y_train_pred, y_test_pred, w_train, w_test, 
     h_sig_test.Scale(1./h_sig_test.Integral())
     h_bkg_test.Scale(1./h_bkg_test.Integral())
     
-    h_sig_train.SetMaximum(h_sig_train.GetMaximum()*1.2);
+    h_sig_train.SetMaximum(h_sig_train.GetMaximum()*2);
     h_sig_train.SetMinimum(0);
     
     h_sig_train.Draw('hist '); h_bkg_train.Draw('hist same')
@@ -82,9 +83,14 @@ def plot_overtrain(y_train, y_test, y_train_pred, y_test_pred, w_train, w_test, 
     leg.SetLineColor(0); leg.SetShadowColor(0); leg.SetFillStyle(0); leg.SetFillColor(0);
     leg.SetTextSize(0.03)
     leg.Draw()
-    
+        
     canvas.Update()
     file_name = "overtrain"
     canvas.Print(full_path+file_name+'.png')
     canvas.Print(full_path+file_name+'.pdf')
-    
+    out_file = ROOT.TFile.Open('histograms.root','RECREATE')
+    h_sig_train.Write()
+    h_bkg_train.Write()
+    h_sig_test.Write()
+    h_bkg_test.Write()
+    out_file.Close()

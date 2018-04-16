@@ -25,9 +25,9 @@ class xgb_analyzer:
     def apply_preselection(self, tmp_df):
         '''Apply some basic prelection for the training samples.'''
         #1 lep+2 lep veto+2 btag+MET>100+MT>150.
-        preselection = \
-        tmp_df["lep1_tight"]==1)&(tmp_df["lep2_tight"]==0)&(tmp_df["lep2_veto"]==0)\
-        &(tmp_df["PassTrackVeto"]==2)&(tmp_df["PassTauVeto"]>=1)\
+        preselection_str = "lep1_tight == 1 && lep2_tight == 0 && lep2_veto == 0 && PassTrackVeto && PassTauVeto && nbtag_loose ==2 && nbtag_med >=1 && new_met>100&& new_mt>150" 
+        preselection = (tmp_df["lep1_tight"]==1)&(tmp_df["lep2_tight"]==0)&(tmp_df["lep2_veto"]==0)\
+        &(tmp_df["PassTrackVeto"]>0)&(tmp_df["PassTauVeto"]>0)\
         &(tmp_df["nbtag_loose"]==2)&(tmp_df["nbtag_med"]>=1)\
         &(tmp_df["new_met"]>100)&(tmp_df["new_mt"]>150)
         
@@ -38,7 +38,7 @@ class xgb_analyzer:
         MC_list = get_files()
         sig_file_name_list = []#sig_file_name_list = ["TChiWH_700_1"]
         bkg_file_name_list = []#bkg_file_name_list = ["ttbar_diLept_madgraph_pythia8_25ns_1",]        
-        for MC in MC_list+grid_list:
+        for MC in MC_list[4:]+grid_list[0:0]:
             print(MC['name'])
             for file_name in MC['file_name_list']:
                 file_name = file_name[file_name.rfind("/")+1:]
@@ -51,13 +51,13 @@ class xgb_analyzer:
         df_list = []
         for file_name in sig_file_name_list:
             tmp_df = read_df_from_csv(file_name)
-            tmp_df = apply_preselection(tmp_df)
+            tmp_df = self.apply_preselection(tmp_df)
             tmp_df["MC_ID"] = 1 #Denote signal with 1 bkg with 0.
             df_list.append(tmp_df)
         
         for file_name in bkg_file_name_list:
             tmp_df = read_df_from_csv(file_name) #Add a number n to read the first n rows.
-            tmp_df = apply_preselection(tmp_df)
+            tmp_df = self.apply_preselection(tmp_df)
             tmp_df["MC_ID"] = 0
             df_list.append(tmp_df)
         self.df = pd.concat(df_list)
@@ -73,10 +73,11 @@ class xgb_analyzer:
     def reweight_dataframe(self):
         '''Reweight so that signal and background have the same total yield.'''
         sig_num = self.df.loc[self.df['MC_ID'] == 1, 'weight'].sum() 
-        bkg_num = self.df.loc[self.df['MC_ID'] == 0, 'weight'].sum()  
-        self.df.loc[self.df['MC_ID'] == 1, 'weight'] *= 1.0*sig_num/sig_num
-        self.df.loc[self.df['MC_ID'] == 0, 'weight'] *= 1.0*sig_num/bkg_num
-        print("Reading the yield: %.2f sig events, %.2f bkg events."%(sig_num, bkg_num))
+        bkg_num = self.df.loc[self.df['MC_ID'] == 0, 'weight'].sum()
+        print("Reading the yield: %.2f sig events, %.2f bkg events."%(sig_num, bkg_num))  
+        self.df.loc[self.df['MC_ID'] == 1, 'weight'] *= 1.0*bkg_num/sig_num
+        self.df.loc[self.df['MC_ID'] == 0, 'weight'] *= 1.0*bkg_num/bkg_num
+        
     
     def xgb_training(self):
         '''Trim unnecessary variables.'''    
@@ -92,7 +93,7 @@ class xgb_analyzer:
         '''Separate Train and Test samples.'''
         X = self.df
         y = self.label.values
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=7)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=7)
         
         w_train = X_train["weight"].values
         w_test = X_test["weight"].values
@@ -108,12 +109,12 @@ class xgb_analyzer:
         dtest.save_binary('test.buffer')
         
         #Set-up training variables
-        params = {"objective":"multi:softprob", "num_class": 2, "max_depth":5, "silent":1, "eta":0.3, \
-        "n_estimators":100}#,"min_child_weight":0.001 
-        num_rounds = 10
+        params = {"objective":"multi:softprob", "num_class": 2, "max_depth":5, "silent":1, "eta":0.01, \
+        "n_estimators":1000}#,"min_child_weight":0.001 
+        num_rounds = 1000
         watchlist = [(dtest,'test'),(dtrain,'train')]
         bst = xgb.train(params, dtrain, num_rounds, watchlist)
-        bst.save_model("xgb_model.xgb")
+        bst.save_model("xgb_model_0412_uniform_weight.xgb")
         self.model = bst 
         self.all_data = [dtrain, dtest, y_train, y_test, w_train, w_test]
         y_train_pred = bst.predict(dtrain)
@@ -130,5 +131,5 @@ class xgb_analyzer:
         #xgb.to_graphviz(bst, num_trees=2)
 a = xgb_analyzer()
 a.prepare_all_data_file()
-a.reweight_dataframe()
+a.reweight_dataframe_uniformly()
 a.xgb_training()

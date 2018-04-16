@@ -12,6 +12,30 @@ from helpers import read_df_from_csv
 import xgboost as xgb
 sys.path.insert(0, '/home/users/siconglu/CMSTAS/software/dataMCplotMaker/')
 import dataMCplotMaker
+
+def get_weight_str(file_name, entry_num):
+    '''Calculate the relevant weights'''
+    
+    f_scanSys = ROOT.TFile.Open("/nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/moriond2017.v13/output/SMS_tchiwh.root","READ") 
+    h_scanSys = f_scanSys.Get("h_counterSMS").Clone("h_scanSys");
+    h_scanN = f_scanSys.Get("histNEvts").Clone("h_scanN"); 
+    nums = re.findall(r'\d+', file_name)
+    c1mass, n1mass = int(nums[-2]), int(nums[-1])
+    
+    c1massbin = h_scanN.GetXaxis().FindBin(c1mass);
+    n1massbin = h_scanN.GetYaxis().FindBin(n1mass);
+    nevents = h_scanN.GetBinContent(c1massbin,n1massbin);
+    
+    #print(c1mass, n1mass, nevents, entry_num)
+    lumi = 35.9
+    if "TChiWH" in file_name:
+        str_condition = "1*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(nevents)
+    else:
+        str_condition = "1*scale1fb*"+str(lumi)
+    str_condition += "*weight_PU*weight_lepSF*weight_btagsf*trigeff"
+    f_scanSys.Close()
+    return str_condition    
+    
 class pandas_analyzer:
     def __init__(self):
         '''Set-up the common variables.'''
@@ -43,20 +67,13 @@ class pandas_analyzer:
                 split_list = [item for item in split_list if not(item == "")]
                 for split in split_list:
                     self.active_branch_list.append(feature)              
-    def get_weight_str(self, file_name, entry_num):
-        '''Calculate the relevant weights'''
-        lumi = 35.9
-        if "TChiWH" in file_name:
-            str_condition = "1*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(entry_num)
-        else:
-            str_condition = "1*scale1fb*"+str(lumi)
-        str_condition += "*weight_PU*weight_lepSF*weight_btagsf*trigeff"
-        return str_condition
-            
+      
     def root_to_df(self,file_name):
         '''Read dataframe frome .root files'''
         print('reading from file % s'%file_name)
         f = ROOT.TFile.Open(file_name)
+        if "WZTo2L2Q_amcnlo_pythia8_25ns" in file_name:
+            self.features.remove("mct")
         t = f.Get('t')
         t.SetBranchStatus("*",0)
         for branch in self.active_branch_list:
@@ -64,7 +81,7 @@ class pandas_analyzer:
         nEntries = t.GetEntries()
         data = []
         print('reading %i rows'%nEntries)
-        str_condition = self.get_weight_str(file_name, nEntries)
+        str_condition = get_weight_str(file_name, nEntries)
         weight_form = ROOT.TTreeFormula("weight",str_condition,t)
         for entry in range(nEntries):
             if entry % 1e4 == 0:
@@ -88,7 +105,11 @@ class pandas_analyzer:
                     row.append(value)
             
             data.append(row)
-        return pd.DataFrame(data, columns = self.features)
+        df = pd.DataFrame(data, columns = self.features)
+        if "WZTo2L2Q_amcnlo_pythia8_25ns" in file_name:
+            df["mct"] = -999 
+            self.features.insert(self.old_features.index("mct"),"mct")
+        return df
     def apply_mask(self, cut_str):
         '''Apply the mask to the temporary dataframe'''
         cut_str.replace("&&"," and ") #Make sure that cut_str is python-styled.
@@ -173,7 +194,7 @@ class pandas_analyzer:
             var = line.replace("\n","")
             self.used_var_list.append(var)
             print(var)
-        model_file = "xgb_model.xgb"
+        model_file = "xgb_model_0412.xgb"
         print("Loading Model:"+model_file)
         self.model = xgb.Booster()
         self.model.load_model(model_file)

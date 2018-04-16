@@ -28,7 +28,7 @@ grid_list = generate_scan_dict()
 
 #Get the total file size in order to estimate the run time.
 total_list = []
-for MC in MC_list[0:0]+grid_list[:]:
+for MC in grid_list[:]+MC_list[0:0]:
     total_list += MC["file_name_list"]
 total_bytes_num = get_total_file_size(total_list)
 print(total_bytes_num*1.0e-6)
@@ -36,25 +36,23 @@ print("Total file size to be processed: %.1f Mb"%(total_bytes_num*1.0e-6))
 start_time = time.time()
 processed_bytes_num = 0
 
-for MC in MC_list[0:0]+grid_list[:]:
+for MC in grid_list[:]+MC_list[0:0]:
     print(MC['name'])
     for file_name in MC['file_name_list']:
         processed_bytes_num += os.path.getsize(file_name)
         file_name = file_name[file_name.rfind("/")+1:]
         file_name = file_name[:file_name.rfind(".")]
         read_list.append(file_name)
-        #if not ("WZTo2L2Q_amcnlo_pythia8_25ns" in read_list) or "WZTo2L2Q_amcnlo_pythia8_25ns" == file_name: continue
-        #a.read_df_from_root(file_name)
+        
         a.load_csv(file_name)
         a.apply_xgb_proba()
         #a.save_df_to_csv()
         a.save_df_to_root()
 
-
-    current_time = time.time()
-    print("Progress: %.1f percent processed"%(processed_bytes_num/total_bytes_num*100.))
-    minutes_left = 1.*(current_time-start_time)/processed_bytes_num*(total_bytes_num-processed_bytes_num)/60.
-    print("Estimated mintues left: %.1f"%minutes_left)
+        current_time = time.time()
+        print("Progress: %.1f percent processed"%(processed_bytes_num/total_bytes_num*100.))
+        minutes_left = 1.*(current_time-start_time)/processed_bytes_num*(total_bytes_num-processed_bytes_num)/60.
+        print("Estimated mintues left: %.1f"%minutes_left)
 
         
 
