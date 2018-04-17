@@ -18,6 +18,9 @@ def get_total_file_size(file_list):
 
 
 from create_file_list import get_files, getgrid, generate_scan_dict
+
+os.nice(19)
+
 a = pandas_analysis.pandas_analyzer()
 a.set_active_branch()
 a.load_xgb_model("xgb_model_0412.xgb")
@@ -54,7 +57,7 @@ for MC in grid_list[0:0]+MC_list[6:]:
 #        print("Progress: %.1f percent processed"%(processed_bytes_num/total_bytes_num*100.))
 #        minutes_left = 1.*(current_time-start_time)/processed_bytes_num*(total_bytes_num-processed_bytes_num)/60.
 #        print("Estimated mintues left: %.1f"%minutes_left)
-a.multiprocessing(read_list, 5)
+a.multiprocessing(read_list, 20)
         
 
 '''Once .csv file is created...'''

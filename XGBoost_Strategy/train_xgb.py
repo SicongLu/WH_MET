@@ -123,7 +123,8 @@ class xgb_analyzer:
         #plt.show()
         #xgb.plot_tree(bst, num_trees=2)
         #xgb.to_graphviz(bst, num_trees=2)
-
+import os
+os.nice(18)
 a = xgb_analyzer()
 a.prepare_all_data_file()
 #a.reweight_dataframe_uniformly()
