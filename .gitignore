@@ -31,9 +31,10 @@
 *.pkl
 *.pickle
 *root_file_temp/*
-*/*.csv
 *.txt
-*/*.txt
+*.buffer
+*.xgb
+
 
 # OS generated files #
 ######################
