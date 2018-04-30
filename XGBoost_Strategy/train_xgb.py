@@ -103,7 +103,7 @@ class xgb_analyzer:
         
         #Set-up training variables
         params = {"objective":"multi:softprob", "num_class": 2, "max_depth":5, "silent":1, "eta":0.01, \
-        "n_estimators":10,"nthread":2}#,"min_child_weight":0.001  #Note that we need to limit the number of cores.
+        "n_estimators":100,"nthread":2}#,"min_child_weight":0.001  #Note that we need to limit the number of cores.
         num_rounds = 200
         watchlist = [(dtest,'test'),(dtrain,'train')]
 
@@ -124,7 +124,7 @@ class xgb_analyzer:
         #xgb.plot_tree(bst, num_trees=2)
         #xgb.to_graphviz(bst, num_trees=2)
 import os
-os.nice(18)
+os.nice(19)
 a = xgb_analyzer()
 a.prepare_all_data_file()
 #a.reweight_dataframe_uniformly()

@@ -23,7 +23,7 @@ os.nice(19)
 
 a = pandas_analysis.pandas_analyzer()
 a.set_active_branch()
-a.load_xgb_model("xgb_model_0412.xgb")
+a.load_xgb_model("xgb_model_0412_uniform_weight.xgb")
 read_list = []
 MC_list = get_files()
 #for MC in MC_list[0:6]:
@@ -31,7 +31,7 @@ grid_list = generate_scan_dict()
 
 #Get the total file size in order to estimate the run time.
 total_list = []
-for MC in grid_list[0:0]+MC_list[6:]:
+for MC in grid_list[0:0]+MC_list[0:6]:
     total_list += MC["file_name_list"]
 total_bytes_num = get_total_file_size(total_list)
 print(total_bytes_num*1.0e-6)
@@ -39,7 +39,7 @@ print("Total file size to be processed: %.1f Mb"%(total_bytes_num*1.0e-6))
 start_time = time.time()
 processed_bytes_num = 0
 name_list = []
-for MC in grid_list[0:0]+MC_list[6:]:
+for MC in grid_list[0:0]+MC_list[0:6]:
     print(MC['name'])
     for file_name in MC['file_name_list']:
         processed_bytes_num += os.path.getsize(file_name)

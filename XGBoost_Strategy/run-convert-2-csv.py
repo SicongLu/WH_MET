@@ -17,7 +17,7 @@ read_list = []
 
 #Get the total file size in order to estimate the run time.
 total_list = []
-for MC in MC_list[0:0]+grid_list[:]:#
+for MC in MC_list[0:6]+grid_list[0:0]:#
     total_list += MC["file_name_list"]
 total_bytes_num = get_total_file_size(total_list)
 print(total_bytes_num*1.0e-6)
@@ -25,7 +25,7 @@ print("Total file size to be processed: %.1f Mb"%(total_bytes_num*1.0e-6))
 start_time = time.time()
 processed_bytes_num = 0
 
-for MC in MC_list[0:0]+grid_list[:]:
+for MC in MC_list[0:6]+grid_list[0:0]:
     print(MC['name'])
     for file_name in MC['file_name_list']:
         processed_bytes_num += os.path.getsize(file_name)

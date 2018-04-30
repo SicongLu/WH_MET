@@ -18,7 +18,6 @@ def get_weight_str(file_name, entry_num):
     '''Calculate the relevant weights'''
     
     f_scanSys = ROOT.TFile.Open("/nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/moriond2017.v13/output/SMS_tchiwh.root","READ") 
-    h_scanSys = f_scanSys.Get("h_counterSMS").Clone("h_scanSys");
     h_scanN = f_scanSys.Get("histNEvts").Clone("h_scanN"); 
     nums = re.findall(r'\d+', file_name)
     c1mass, n1mass = int(nums[-2]), int(nums[-1])
