@@ -198,7 +198,10 @@ def test_get_scan(yield_file, SR_list = ["SR1", "SR2"]):
         for bkg in bkg_list: #For each background category
             tmp_str = df[SR][df[' '] == bkg_row_name[bkg]].values[0]
             y, s = str2yield(tmp_str)
-            s = 1.0*s/y+1
+            if y != 0:
+                s = 1.0*s/y+1
+            else:
+                s = 1.0+s
             backgrounds[bkg].append(y)
             errors[bkg].append(s)
     zero_list = [0 for i in range(len(errors['1l']))] #1l now includes both W+LF/W+HF
@@ -215,7 +218,10 @@ def test_get_scan(yield_file, SR_list = ["SR1", "SR2"]):
             tmp_str = df[SR][df[' '] == MC_name].values[0]
             
             y, s = str2yield(tmp_str)
-            s = 1.0*s/y+1
+            if y != 0:
+                s = 1.0*s/y+1
+            else:
+                s = 1.0+s
             namestring=str(mass[0])+'_'+str(mass[1])
             scandict[namestring]={'yield': y, 'stat': s, 'sysmet': 0,'sysbtagsf':0 ,'syslepsf':0, 'sysscale':0, 'systrig':0, 'sysjec':0}
             scandict[namestring] = get_temp_syst(mass_chargino, mass_lsp, scandict[namestring])
@@ -226,16 +232,25 @@ def test_get_scan(yield_file, SR_list = ["SR1", "SR2"]):
     print errors
     
     return scandicts, backgrounds,errors
-
+import sys
 if __name__ == "__main__":
    # specify selection here to get a set of backgrounds
    version='0'
-   #SR_list = ["SR1", "SR2","PSR3jet_met_200_mct250"]#,"PSR3jet_met_200_mct250"
-   SR_list = ["SR1", "SR2"]#,"PSR3jet_met_200_mct250"
+   new_cate = sys.argv[1]
+   date = sys.argv[2]
+   #new_cate = "PSR3jet_met_200_mct225"
+   #new_cate = "PSR3jet_met_200_mct250"
+   #new_cate = "PSR3jet_met_200_mct275"
+   if new_cate != "original":
+       SR_list = ["SR1", "SR2",new_cate]#,"PSR3jet_met_200_mct250"
+   else:
+       SR_list = ["SR1", "SR2"]
+   #SR_list = ["SR1", "SR2"]#,"PSR3jet_met_200_mct250"
    zbins = len(SR_list)
    selection=""
-   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_test_04_13"#%version#_3jets
+   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_"+new_cate+"_"+date+"/"#%version#_3jets
    yield_file = "../Analysis_Code/table_of_yield_04_12_sub.csv"
+   #yield_file = "../Analysis_Code/table_of_yield_04_26_SR_lumi_80fb.csv"
    scandicts, bkgs,err = test_get_scan(yield_file, SR_list = SR_list)
  
    # output directory for cards

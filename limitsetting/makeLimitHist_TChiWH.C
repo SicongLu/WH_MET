@@ -64,7 +64,7 @@ TGraph* getGraph(TH2* hobs, bool useLongest) {
   return static_cast<TGraph*>(graph);
 }
 
-int makeLimitHist_TChiWH()
+int makeLimitHist_TChiWH(TString new_cate = "", TString date_str = "")
 {
 
 //  setTDRStyle();           
@@ -72,9 +72,9 @@ int makeLimitHist_TChiWH()
   TH1F * h_susyxsecs  = NULL;
   TFile * f_susyxsecs = NULL;
 
-  TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_test_04_13_3jets/"; //_3jets/
+  TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_"+new_cate+"_"+date_str+"/";
   TString plot_dir = "/home/users/siconglu/CMSTAS/software/niceplots/WH_Expected_Exclusion/";
-  TString plot_name = "TChiWHlnubb_Exclusion_13TeV_sicong_04_13_3jets.pdf";//_3jets
+  TString plot_name = "TChiWHlnubb_Exclusion_13TeV_sicong_"+new_cate+"_"+date_str+".pdf";//_3jets
   //TString file_dir = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_test_04_09/";
   f_susyxsecs = TFile::Open(file_dir+"xsec_susy_13tev.root","READ");
   h_susyxsecs = (TH1F*)f_susyxsecs->Get("h_xsec_c1n2")->Clone("h_susyxsecs");
