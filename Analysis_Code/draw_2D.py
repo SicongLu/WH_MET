@@ -94,12 +94,14 @@ def flatten_var_name(var_name):
 def plot_comparison(var_dict1, var_dict2, lumi, MC_multi, sample_index, plot_folder_name):
     #Collect histograms
     MC_list = get_files()
-    new_location = "../root_file_temp/Sicong_20180228/"
-    MC = MC_list[sample_index]
+    new_location = "../root_file_temp/Sicong_20180408/"
+    tmp_MC_list = [{"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]}]
+    MC = tmp_MC_list[0]
+    #MC = MC_list[sample_index]
     MC_name = MC["name"]
     #Collecting the plot
     file_name_list = MC["file_name_list"]
-
+    
     sum_hist = ROOT.TH2F("sum_hist","sum_hist",\
     var_dict1["bin_num"],var_dict1["xmin"],var_dict1["xmax"],\
     var_dict2["bin_num"],var_dict2["xmin"],var_dict2["xmax"])
@@ -170,8 +172,9 @@ plot_dict_list = [\
 
 #Common set-up 
 lumi = 35.9
-plot_folder_name = "WH_Analysis_Correlations/"
+plot_folder_name = "WH_Analysis_Correlations_CMS4_20180420/"
 sample_index_list = [5]
+
 
 MC_multi = 5
 #Cut-Conditions

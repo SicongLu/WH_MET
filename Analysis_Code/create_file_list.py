@@ -77,7 +77,18 @@ def get_files():
     
     
     return MC_list
-
+def get_tmp_files():
+    tmp_MC_list = [
+    {"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]},
+    {"name":"new (700,100)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_100_test.root"]},
+    {"name":"new (700,150)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_150_test.root"]},
+    {"name":"new (600,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_600_1_test.root"]},
+    {"name":"new (600,100)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_600_100_test.root"]},
+    {"name":"new (600,150)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_600_150_test.root"]},
+    {"name":"new 2l top", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/ttbar_di_lep_test.root"]},
+    {"name":"new 1l top", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/ttbar_single_lep_test.root"]},
+    ]
+    return tmp_MC_list
 def getgrid():
     '''Define the grids.'''
     grid = [[150, 1], [150, 24], \

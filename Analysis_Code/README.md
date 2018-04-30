@@ -9,7 +9,7 @@ Note that the two scripts above are referenced in all of the following codes.
 
 # Feature generation
 Generate new features from old ones and save in a new .root files.
-(Will add trimming later...)
+feature_generation.py will generte relevant features. (Need to utilize multiprocessing.)
 
 # Signal Grid File Parsing
 get_grid_entry.py makes text files with all the entry number for each points at:
@@ -17,17 +17,25 @@ get_grid_entry.py makes text files with all the entry number for each points at:
 parse_ttree.C will parse the tree accordingly for each text file.
 
 
-
 # 1D and 2D variable distribution plots
 quick_draw.py will use the simplest TTree.Draw() to quickly draw the relevant branches in certain regions.
 
 slow_draw.py will loop through the events and calculate new variables.
 
-draw_2D.py will draw the 2D distributions. 
+draw_2D.py will draw the 2D distributions.
+
+check_CR.py will make the CR plots used in validation.
+
+examin_1jet.py will focus on the 1 jet variables.
+
+
+# Preliminary estimation of yield
+ 
 
 # Cutflow and Yield
-make_cutlow_table.py will create the cutflow table.
-yield_table_create.py will create the yield table.
+make_cutlow_table.py will create the cutflow table and the n - 1 table, this can be used for examining orthorgonal and additional signal region.
+mp_yield_table_create.py will create the yield table with python multi_processing, the yield table will be used in the limit setting process. 
+
 
 
 

@@ -163,7 +163,7 @@ def feature_generate(file_name, file_name_out):
         ngoodjets = 0 #Local variable to check if the definition is consistent.
         bjet_index = []
         for i_jet in range(len(t.ak4pfjets_p4)):
-            if not(t.ak4pfjets_p4.at(i_jet).Pt()>30 and \
+            if not(t.ak4pfjets_p4.at(i_jet).Pt()>20 and \
             t.ak4pfjets_p4.at(i_jet).Eta()<2.4 and \
             t.ak4pfjets_loose_pfid.at(i_jet)): 
                 continue;

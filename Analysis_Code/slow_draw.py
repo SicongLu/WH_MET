@@ -10,6 +10,11 @@ def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
     t = f.Get("t")
     myhist = ROOT.TH1F("myhist","myhist",bin_num,xmin,xmax);
     #t.Draw(var_name+">>myhist",str_condition,"goff")
+#    if not("test" in file_name):
+#        str_condition +="&& ngoodjets == 1"
+#    else:
+#        str_condition +="&& ngoodjets == 2"
+
     weight_form = ROOT.TTreeFormula("weight",str_condition,t)
     for i in range(t.GetEntries()):
         if i % 1e4 == 0: print(i)
@@ -36,19 +41,34 @@ def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
             else:
                 value = -999
         elif var_name == "ak4pf_1st_pT":
-            if len(pT_list)>=1:
+            if len(pT_list) == 1:
                 value = pT_list[0]
+                if value<30: value = -999;
             else:
                 value = -999
         elif var_name == "ak4pf_2nd_pT":
             if len(pT_list)>=2:
                 value = pT_list[1]
+                if pT_list[0]<30 or value>30: value = -999;
             else:
                 value = -999
-
+        elif var_name == "ak4pf_separate_high":
+            if len(pT_list)>=2:
+                value = pT_list[1]
+                if pT_list[0]<600 or value>30: value = -999;
+            else:
+                value = -999
+        elif var_name == "ak4pf_separate_low":
+            if len(pT_list)>=2:
+                value = pT_list[1]
+                if pT_list[0]>=600 or value>30: value = -999;
+            else:
+                value = -999
+        
         myhist.Fill(value, weight)
     
-    print(myhist.Integral())
+    #if myhist.Integral()!=0:
+    #    myhist.Scale(1./myhist.Integral())
     myhist.SetDirectory(0);
     #ROOT.TH1.AddDirectory(ROOT.kFALSE); 
     
@@ -66,8 +86,9 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
     MC_list = get_files()
     hist_list = []
     name_list = []
-    new_location = "../root_file_temp/Sicong_20180408/"
-    for MC in [MC_list[index] for index in sample_index_list]:
+    new_location = "../root_file_temp/Sicong_20180422/"
+    tmp_MC_list = [{"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]}]
+    for MC in [MC_list[index] for index in sample_index_list]+tmp_MC_list:
         MC_name = MC["name"]
         file_name_list = MC["file_name_list"]
         if not("(" in MC_name) and "genbosons_id==25" in var_name:
@@ -123,21 +144,24 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
 #Basic Set-up
 #Other relevant set-up
 plot_dict_list = [
-{"var_name":"genqs_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
-{"var_name":"genqs_2nd_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
-{"var_name":"ak4pf_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
-{"var_name":"ak4pf_2nd_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
+#{"var_name":"genqs_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
+#{"var_name":"genqs_2nd_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
+#{"var_name":"ak4pf_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
+{"var_name":"ak4pf_2nd_pT", "xmin":0, "xmax":50, "bin_num": 25},\
+#{"var_name":"ak4pf_separate_high", "xmin":0, "xmax":50, "bin_num": 25},\
+#{"var_name":"ak4pf_separate_low", "xmin":0, "xmax":50, "bin_num": 25},\
 ]
 
 #Common set-up 
 lumi = 35.9
 #plot_folder_name = "WH_Comparison_20180321_alljets/"
-plot_folder_name = "WH_Comparison_20180411_1jet/"
+plot_folder_name = "WH_Comparison_20180423_1jet_compare_old_new/"
 #plot_folder_name = "WH_Comparison_20180315_2jet/"
 
 sample_index_list = [1, 2, 3, 4, 5, 6]
 sample_index_list = [4,5,6,7,8,9,10]
-sample_index_list = [4,5]
+sample_index_list = [2, 3, 4, 5]
+sample_index_list = []
 MC_multi = 300
 #MC_multi = 5
 #Cut-Conditions
@@ -151,9 +175,15 @@ current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
 
 current_condition_list = [cut_dict[item] for item in current_cut_list]
 str_condition = combine_cuts(current_condition_list)
-str_condition +="&& ngoodjets == 1"
+str_condition_1jet = "((ngoodjets == 1 && ak4pfjets_p4[0].fCoordinates.Pt()>=30) ||"+\
+"(ngoodjets >= 2 && ak4pfjets_p4[0].fCoordinates.Pt()>=30 && ak4pfjets_p4[1].fCoordinates.Pt()<30))"
+str_condition_1jet = "(ngoodjets >= 2 && ak4pfjets_p4[0].fCoordinates.Pt()>=30 && ak4pfjets_p4[1].fCoordinates.Pt()<30)"
+
+str_condition_2jet = "((ngoodjets == 2 && ak4pfjets_p4[1].fCoordinates.Pt()>=30) ||"+\
+"(ngoodjets >= 3 && ak4pfjets_p4[1].fCoordinates.Pt()>=30 && ak4pfjets_p4[2].fCoordinates.Pt()<30))"
+str_condition += "&&"+str_condition_1jet
 #str_condition +="&& ngoodjets == 2"
-str_condition = "("+str_condition+")*scale1fb*"+str(lumi)
+#str_condition = "("+str_condition+")*scale1fb*"+str(lumi)
 #Plotting
 for plot_dict in plot_dict_list:
     print(plot_dict)

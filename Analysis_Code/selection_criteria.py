@@ -142,7 +142,7 @@ def get_cut_dict():
     CR2l_cut_2 = combine_cuts(CR2l_condition_list_2)
     
     CR2l_cut = "("+CR2l_cut_1+")||("+CR2l_cut_2+")"
-    #region_cut_dict["CR2l"] = CR2l_cut
+    region_cut_dict["CR2l"] = CR2l_cut
     
     #CR0b
     CR0b1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
@@ -157,6 +157,7 @@ def get_cut_dict():
     
     region_cut_dict["CR0b1"] = CR0b1_cut
     region_cut_dict["CR0b2"] = CR0b2_cut
+    region_cut_dict["CR0b_inclusive"] = "("+CR0b1_cut+")||("+CR0b2_cut+")"
     
     #CRMbb
     CRMbb1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
@@ -171,6 +172,7 @@ def get_cut_dict():
     
     region_cut_dict["CRMbb1"] = CRMbb1_cut
     region_cut_dict["CRMbb2"] = CRMbb2_cut
+    region_cut_dict["CRMbb_inclusive"] = "("+CRMbb1_cut+")||("+CRMbb2_cut+")"
     
     #Proposed SR 
     PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
@@ -178,13 +180,20 @@ def get_cut_dict():
     PSR_condition_list = [cut_dict[item] for item in PSR_list]
     PSR_cut = combine_cuts(PSR_condition_list)
     
-#    region_cut_dict["PSR3jet_met_200_mct200"] = PSR_cut + "&& new_mct > 200"
+    region_cut_dict["PSR3jet_met_200_mct200"] = PSR_cut + "&& new_mct > 200"
     region_cut_dict["PSR3jet_met_200_mct225"] = PSR_cut + "&& new_mct > 225"
     region_cut_dict["PSR3jet_met_200_mct250"] = PSR_cut + "&& new_mct > 250"
     region_cut_dict["PSR3jet_met_200_mct275"] = PSR_cut + "&& new_mct > 275"
 #    region_cut_dict["PSR3jet_met_200_mct300"] = PSR_cut + "&& new_mct > 300"
+    region_cut_dict["PSR3jet_met_200_mct225_xgb_0p4"] = PSR_cut + "&& new_mct > 225"+"&& xgb_proba>0.4"
+    region_cut_dict["PSR3jet_met_200_mct225_xgb_0p2"] = PSR_cut + "&& new_mct > 225"+"&& xgb_proba>0.2"
+    region_cut_dict["PSR3jet_met_200_mct200_xgb_0p4"] = PSR_cut + "&& new_mct > 200"+"&& xgb_proba>0.4"
+    region_cut_dict["PSR3jet_met_200_mct200_xgb_0p2"] = PSR_cut + "&& new_mct > 200"+"&& xgb_proba>0.2"
         
-    
+    #Test even higher met...
+    region_cut_dict["PSR3jet_met_225_mct225"] = PSR_cut + "&& new_met > 225 && new_mct > 225"
+    region_cut_dict["PSR3jet_met_225_mct225_2vars"] = region_cut_dict["PSR3jet_met_225_mct225"] + "&& ak4_htratiom < 0.3 && mindphi_met_j1_j2 > 1"
+
     PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "3goodjets", "goodbtags", "m_bb", "event_met_pt", "mt"]
     PSR_condition_list = [cut_dict[item] for item in PSR_list]
