@@ -64,18 +64,40 @@ def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
                 if pT_list[0]>=600 or value>30: value = -999;
             else:
                 value = -999
-        
+        elif var_name == "b_ranked_3rd_jet":
+            b_score_list = [item for item in t.ak4pfjets_CSV]
+            sort_b_score_list = sorted(b_score_list, reverse=True)
+            ind_3rd = b_score_list.index(sort_b_score_list[2])
+            pt_3rd = p4_list[ind_3rd].Pt()
+            value = pt_3rd 
+        elif var_name == "b_ranked_2nd_jet":
+            b_score_list = [item for item in t.ak4pfjets_CSV]
+            sort_b_score_list = sorted(b_score_list, reverse=True)
+            ind_2nd = b_score_list.index(sort_b_score_list[1])
+            pt_2nd = p4_list[ind_2nd].Pt()
+            value = pt_2nd
+        elif var_name == "b_ranked_1st_jet":
+            b_score_list = [item for item in t.ak4pfjets_CSV]
+            sort_b_score_list = sorted(b_score_list, reverse=True)
+            ind_1st = b_score_list.index(sort_b_score_list[0])
+            pt_1st = p4_list[ind_1st].Pt()
+            value = pt_1st
+        elif var_name == "b_ranked_3rd_jet_ind":
+            b_score_list = [item for item in t.ak4pfjets_CSV]
+            sort_b_score_list = sorted(b_score_list, reverse=True)
+            ind_3rd = b_score_list.index(sort_b_score_list[2])
+            value = ind_3rd
         myhist.Fill(value, weight)
     
-    #if myhist.Integral()!=0:
-    #    myhist.Scale(1./myhist.Integral())
+    if myhist.Integral()!=0:
+        myhist.Scale(1./myhist.Integral())
     myhist.SetDirectory(0);
     #ROOT.TH1.AddDirectory(ROOT.kFALSE); 
     
     f.Close()
     return myhist
 from create_file_list import get_files
-def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_list, plot_folder_name):
+def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_list, plot_folder_name, str_condition):
     #Remove special chars in var_name:
     tmp_var_name = var_name[:]
     char_str = "!@#$%^&*()[]{};:,./<>?\|`~-=_+"
@@ -86,9 +108,9 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
     MC_list = get_files()
     hist_list = []
     name_list = []
-    new_location = "../root_file_temp/Sicong_20180422/"
+    new_location = "../root_file_temp/Sicong_20180408/"
     tmp_MC_list = [{"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]}]
-    for MC in [MC_list[index] for index in sample_index_list]+tmp_MC_list:
+    for MC in [MC_list[index] for index in sample_index_list]+tmp_MC_list[0:0]:
         MC_name = MC["name"]
         file_name_list = MC["file_name_list"]
         if not("(" in MC_name) and "genbosons_id==25" in var_name:
@@ -147,22 +169,28 @@ plot_dict_list = [
 #{"var_name":"genqs_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
 #{"var_name":"genqs_2nd_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
 #{"var_name":"ak4pf_1st_pT", "xmin":0, "xmax":1000, "bin_num": 25},\
-{"var_name":"ak4pf_2nd_pT", "xmin":0, "xmax":50, "bin_num": 25},\
+#{"var_name":"ak4pf_2nd_pT", "xmin":0, "xmax":50, "bin_num": 25},\
 #{"var_name":"ak4pf_separate_high", "xmin":0, "xmax":50, "bin_num": 25},\
 #{"var_name":"ak4pf_separate_low", "xmin":0, "xmax":50, "bin_num": 25},\
+#{"var_name":"b_ranked_3rd_jet", "xmin":0, "xmax":1000, "bin_num": 25},\
+#{"var_name":"b_ranked_2nd_jet", "xmin":0, "xmax":1000, "bin_num": 25},\
+#{"var_name":"b_ranked_1st_jet", "xmin":0, "xmax":1000, "bin_num": 25},\
+{"var_name":"b_ranked_3rd_jet_ind", "xmin":0, "xmax":10, "bin_num": 10},\
 ]
 
 #Common set-up 
 lumi = 35.9
 #plot_folder_name = "WH_Comparison_20180321_alljets/"
-plot_folder_name = "WH_Comparison_20180423_1jet_compare_old_new/"
+#plot_folder_name = "WH_Comparison_20180423_1jet_compare_old_new/"
 #plot_folder_name = "WH_Comparison_20180315_2jet/"
+plot_folder_name = "WH_Comparison_20180524_3jet/"
 
 sample_index_list = [1, 2, 3, 4, 5, 6]
 sample_index_list = [4,5,6,7,8,9,10]
-sample_index_list = [2, 3, 4, 5]
-sample_index_list = []
-MC_multi = 300
+sample_index_list = [0, 1, 2, 3, 4, 5]
+#sample_index_list = [5]
+#sample_index_list = []
+MC_multi = 1
 #MC_multi = 5
 #Cut-Conditions
 from selection_criteria import get_cut_dict, combine_cuts
@@ -181,12 +209,13 @@ str_condition_1jet = "(ngoodjets >= 2 && ak4pfjets_p4[0].fCoordinates.Pt()>=30 &
 
 str_condition_2jet = "((ngoodjets == 2 && ak4pfjets_p4[1].fCoordinates.Pt()>=30) ||"+\
 "(ngoodjets >= 3 && ak4pfjets_p4[1].fCoordinates.Pt()>=30 && ak4pfjets_p4[2].fCoordinates.Pt()<30))"
-str_condition += "&&"+str_condition_1jet
+str_condition_3jet = "(ngoodjets >= 3)"
+str_condition += "&&"+str_condition_3jet+"&& mindphi_met_j1_j2<1 && new_mct > 200 && new_met > 200" 
 #str_condition +="&& ngoodjets == 2"
 #str_condition = "("+str_condition+")*scale1fb*"+str(lumi)
 #Plotting
 for plot_dict in plot_dict_list:
     print(plot_dict)
-    plot_comparison(plot_dict["var_name"], plot_dict["xmin"], plot_dict["xmax"], plot_dict["bin_num"], lumi, MC_multi, sample_index_list, plot_folder_name)
+    plot_comparison(plot_dict["var_name"], plot_dict["xmin"], plot_dict["xmax"], plot_dict["bin_num"], lumi, MC_multi, sample_index_list, plot_folder_name,str_condition)
 
 

@@ -38,22 +38,36 @@ def draw_histo_2D(file_name, str_condition, var_dict1,var_dict2):
             v1 = 0
             v2 = 0
             num_H_daughter = 0
-            for i in range(len(m_id)):
-                if t.genqs_motherid.at(i) == 25 and t.genqs_id.at(i) == -5 and v1 == 0:
-                    num_H_daughter += 1
-                    v1 = t.genqs_p4.at(i)
-                if t.genqs_motherid.at(i) == 25 and t.genqs_id.at(i) == 5 and v2 == 0:
-                    num_H_daughter += 1
-                    v2 = t.genqs_p4.at(i)
+            for q_i in range(len(m_id)):
+                if ("TChiWH" in file_name):
+                    if t.genqs_motherid.at(q_i) == 25 and t.genqs_id.at(q_i) == -5 and t.genqs_isLastCopy.at(q_i) and v1 ==0:#v1 == 0:
+                        num_H_daughter += 1
+                        v1 = t.genqs_p4.at(q_i)
+                    if t.genqs_motherid.at(q_i) == 25 and t.genqs_id.at(q_i) == 5 and t.genqs_isLastCopy.at(q_i) and v2 ==0:#v2 == 0:
+                        num_H_daughter += 1
+                        v2 = t.genqs_p4.at(q_i)
+                else:
+                    if t.genqs_motherid.at(q_i) == 6 and t.genqs_id.at(q_i) == 5 and t.genqs_isLastCopy.at(q_i) and v1 == 0:
+                        num_H_daughter += 1
+                        v1 = t.genqs_p4.at(q_i)
+                    if t.genqs_motherid.at(q_i) == -6 and t.genqs_id.at(q_i) == -5 and t.genqs_isLastCopy.at(q_i) and v2 == 0:
+                        num_H_daughter += 1
+                        v2 = t.genqs_p4.at(q_i)
             #print(num_H_daughter)
-            
-            dR_bb = delta_R(v1,v2)          
+            if num_H_daughter != 2:
+                #print(v1, v2, num_H_daughter)
+                continue;
+            dR_bb = delta_R(v1,v2)
+            pT_bb = (v1+v2).Pt()          
             #if dR_bb > 0.4:
             #    print("m_H = %.2f"%(v1+v2).M())
-            value = -999
-            for i in range(len(t.genbosons_id)):
-                if t.genbosons_id.at(i) == 25:
-                    value = t.genbosons_p4.at(i).Pt()
+            if False:#("TChiWH" in file_name):
+                value = -999
+                for i in range(len(t.genbosons_id)):
+                    if t.genbosons_id.at(i) == 25:
+                        value = t.genbosons_p4.at(i).Pt()
+            else:
+                value = pT_bb
             myhist.Fill(dR_bb, value, weight)
     elif var_dict1["var_name"] == "sublead_bjet_pt":
         weight_form = ROOT.TTreeFormula("weight",str_condition,t)
@@ -82,7 +96,7 @@ def draw_histo_2D(file_name, str_condition, var_dict1,var_dict2):
     
     f.Close()
     return myhist
-from create_file_list import get_files
+from create_file_list import get_files,get_new_files
 def flatten_var_name(var_name):
     #Remove special chars in var_name:
     tmp_var_name = var_name[:]
@@ -93,12 +107,19 @@ def flatten_var_name(var_name):
     return tmp_var_name
 def plot_comparison(var_dict1, var_dict2, lumi, MC_multi, sample_index, plot_folder_name):
     #Collect histograms
-    MC_list = get_files()
-    new_location = "../root_file_temp/Sicong_20180408/"
+    #MC_list = get_files()
+    #new_location = "../root_file_temp/Sicong_20180408/"
+    MC_list = get_new_files()
+    new_location = "../root_file_temp/Sicong_20180722/"
     tmp_MC_list = [{"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]}]
-    MC = tmp_MC_list[0]
-    #MC = MC_list[sample_index]
+    #MC = tmp_MC_list[0]
+    MC = MC_list[sample_index]
     MC_name = MC["name"]
+    if "(" in MC_name:
+        MC_name = "TChiWH"
+    else:
+        MC_name = "BKG_ttbar"
+    plot_folder_name+=MC_name+"_"
     #Collecting the plot
     file_name_list = MC["file_name_list"]
     
@@ -108,7 +129,7 @@ def plot_comparison(var_dict1, var_dict2, lumi, MC_multi, sample_index, plot_fol
     #sum_hist.SetDirectory(0);  
     #ROOT.TH1.AddDirectory(ROOT.kFALSE);
     sum_dict = {}
-    for file_name in file_name_list:
+    for file_name in file_name_list[0:min(len(file_name_list),1000)]:
         file_name = new_location + file_name[file_name.rfind("/")+1:]
         print(file_name)
         hist = draw_histo_2D(file_name, str_condition, var_dict1, var_dict2)
@@ -116,7 +137,7 @@ def plot_comparison(var_dict1, var_dict2, lumi, MC_multi, sample_index, plot_fol
     if "(" in MC_name:
         sum_hist.Scale(MC_multi)
         MC_name += " x " + str(MC_multi) 
-        
+    sum_hist.Scale(40.*40./sum_hist.Integral())
     ROOT.gStyle.SetOptStat(0);
     ROOT.gStyle.SetOptTitle(0);
     canvas = ROOT.TCanvas("can","can",800,800)
@@ -124,17 +145,21 @@ def plot_comparison(var_dict1, var_dict2, lumi, MC_multi, sample_index, plot_fol
     canvas.SetBorderSize(2);
     canvas.SetTickx(1);
     canvas.SetTicky(1);
-    canvas.SetLeftMargin(0.1);
-    canvas.SetRightMargin(0.1);
-    canvas.SetTopMargin(0.1);
-    canvas.SetBottomMargin(0.1);
+    canvas.SetLeftMargin(0.135);
+    canvas.SetRightMargin(0.135);
+    canvas.SetTopMargin(0.135);
+    canvas.SetBottomMargin(0.135);
     canvas.SetFrameBorderMode(0);
     sum_hist.Draw("colz")
     canvas.Update()
     canvas.SetTitle(MC_name)
-    sum_hist.GetXaxis().SetTitle(var_dict1["var_name"]);
-    sum_hist.GetYaxis().SetTitle(var_dict2["var_name"]); 
+    #sum_hist.GetXaxis().SetTitle(var_dict1["var_name"]);
+    #sum_hist.GetYaxis().SetTitle(var_dict2["var_name"]); 
+    sum_hist.GetXaxis().SetTitle("Gen #DeltaR(b,#bar{b})");
+    sum_hist.GetYaxis().SetTitle("Gen p_{T}(b#bar{b})");
+    sum_hist.GetYaxis().SetTitleOffset(1.5);
     
+    sum_hist.GetZaxis().SetTitle("Percentage (%)");
     outputName = "/home/users/siconglu/CMSTAS/software/niceplots/"+plot_folder_name+\
     flatten_var_name(var_dict1["var_name"])+"VS"+flatten_var_name(var_dict2["var_name"])+".pdf"
     canvas.Print(outputName)
@@ -172,8 +197,8 @@ plot_dict_list = [\
 
 #Common set-up 
 lumi = 35.9
-plot_folder_name = "WH_Analysis_Correlations_CMS4_20180420/"
-sample_index_list = [5]
+plot_folder_name = "WH_Analysis_Correlations_20180725_new_sample/"
+sample_index_list = [0]
 
 
 MC_multi = 5
@@ -189,7 +214,8 @@ current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
 current_condition_list = [cut_dict[item] for item in current_cut_list]
 str_condition = combine_cuts(current_condition_list)
 #str_condition = "("+str_condition+"&& ngoodjets == 1)*scale1fb*"+str(lumi)
-str_condition = "("+str_condition+"&& ngoodjets == 2)*scale1fb*"+str(lumi)
+#str_condition = "("+str_condition+"&& ngoodjets30 == 1)"
+#str_condition = "("+str_condition+"&& ngoodjets == 2)*scale1fb*"+str(lumi)
 #Plotting
 for sample_index in sample_index_list:
 #    plot_comparison(plot_dict_list[0], plot_dict_list[2], lumi, MC_multi, sample_index, plot_folder_name)

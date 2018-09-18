@@ -5,14 +5,13 @@ import math
 import time
 import multiprocessing as mp
 import os
-#os.nice(19)
+os.nice(19)
 ROOT.gStyle.SetOptStat(0);
 ROOT.gStyle.SetOptTitle(0);
-#To-do!!!!:
-#Need to modify the code to include selection of 2lCR in the get_weight_str
-#Also need to check which triglep1 or triglep2_sf should be used!!!
-def get_weight_str(file_name, entry_num, if_dilep = False):
+
+def get_weight_str(file_name, entry_num):
     '''Calculate the relevant weights'''
+    #print(c1mass, n1mass, nevents, entry_num)
     #return "1"
     lumi = 35.9
     if "TChiWH" in file_name:
@@ -26,37 +25,32 @@ def get_weight_str(file_name, entry_num, if_dilep = False):
         n1massbin = h_scanN.GetYaxis().FindBin(n1mass);
         nevents = h_scanN.GetBinContent(c1massbin,n1massbin);
         f_scanSys.Close()
+        #str_condition = "1*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(nevents)
         str_condition = "1*xsec*0.58*0.3*1000*"+str(lumi)+"/"+str(nevents)#Problem on xsec
     elif "data" in file_name:
         return "1"
     else:
-        str_condition = "1.0*scale1fb*"+str(lumi)
-    if if_dilep:
-        #trigeff_str = "(1-(1-triglep1)*(1-triglep2))"
-        trigeff_str = "(triglep1+triglep2-triglep1*triglep2)"
-    else:
-        trigeff_str = "triglep1"
-    str_condition += "*weight_PU*weight_lepSF*weight_btagsf"+"*"+trigeff_str
-    #str_condition += "*weight_PU*weight_lepSF*weight_btagsf*trigeff"
+        str_condition = "1*scale1fb*"+str(lumi)
+    str_condition += "*weight_PU*weight_lepSF*weight_btagsf*trigeff"
     return str_condition
 
-def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax, if_dilep = False):
+def draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax):
     #print(file_name, var_name, str_condition, bin_num, xmin, xmax)
     f = ROOT.TFile(file_name)
     t = f.Get("t")
-    weight_str = get_weight_str(file_name, t.GetEntries(), if_dilep = False)
-    str_condition_num = str_condition
+    weight_str = get_weight_str(file_name, t.GetEntries())
     str_condition = "("+str_condition+")*"+weight_str
     myhist = ROOT.TH1F("myhist","myhist",bin_num,xmin,xmax);
     t.Draw(var_name+">>myhist",str_condition,"goff")
+    
+    #print(myhist.Integral())
     myhist.SetDirectory(0);
-    #ROOT.TH1.AddDirectory(ROOT.kFALSE);
-    print("Integrated to:%.1f with %.1f events." %(t.GetEntries(str_condition),t.GetEntries(str_condition_num)))
+    #ROOT.TH1.AddDirectory(ROOT.kFALSE); 
     
     f.Close()
     return myhist
 from create_file_list import get_files
-def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_list, plot_folder_name, str_condition):
+def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_list, plot_folder_name):
     #Remove special chars in var_name:
     tmp_var_name = var_name[:]
     char_str = "!@#$%^&*()[]{};:,./<>?\|`~-=_+"
@@ -65,23 +59,34 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
         tmp_var_name = tmp_var_name.replace(char,"_")
     #Collect histograms
     MC_list = get_files()
+    MC = MC_list[7]
+    new_MC_list = []
+    for file_name in MC["file_name_list"]:
+        tmp_MC = {"name":MC["name"]+"_%.0f"%MC["file_name_list"].index(file_name),"file_name_list":[file_name]}
+        new_MC_list.append(tmp_MC)
+       
+    
+    MC_list = new_MC_list
+    sample_index_list = range(5)
     hist_list = []
     name_list = []
-    #new_location = "../root_file_temp/Sicong_20180408/"
-    #new_location = "../root_file_temp/Sicong_20180605/"
-    new_location = "../root_file_temp/Sicong_20180716/"
+    new_location = "../root_file_temp/Sicong_20180408/"
+    #new_location = "../root_file_temp/XGB_20180410/"
     for MC in [MC_list[index] for index in sample_index_list]:
         MC_name = MC["name"]
         file_name_list = MC["file_name_list"]
+        if not("(" in MC_name) and "genbosons_id==25" in var_name:
+            continue
         sum_hist = ROOT.TH1F("sum_hist"+tmp_var_name+str(len(name_list)),"sum_hist",bin_num,xmin,xmax)
         #sum_hist.SetDirectory(0);  
         #ROOT.TH1.AddDirectory(ROOT.kFALSE);
         sum_dict = {}
         for file_name in file_name_list:
             file_name = new_location + file_name[file_name.rfind("/")+1:]
-            hist = draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax, if_dilep = False)
+            #print(file_name)
+            hist = draw_histo(file_name, var_name, str_condition, bin_num, xmin, xmax)
             sum_hist.Add( sum_hist, hist, 1.0, 1.0 )
-        
+         
         hist_list.append(sum_hist)
         name_list.append(MC_name)
     for MC in [MC_list[index] for index in sample_index_list]:
@@ -134,42 +139,72 @@ def plot_comparison(var_name, xmin, xmax, bin_num, lumi, MC_multi, sample_index_
 
 #Basic Set-up
 #Other relevant set-up
-plot_dict_list = [
-{"var_name":"ngoodjets", "xmin":0, "xmax":10, "bin_num": 10},\
+plot_dict_list = [#{"var_name":"ptbb", "xmin":20, "xmax":600, "bin_num": 40},\
+#{"var_name":"ngoodjets", "xmin":0, "xmax":10, "bin_num": 10},\
+##{"var_name":"genbosons_id", "xmin":15, "xmax":30, "bin_num": 15},\
+##{"var_name":"genbosons_p4.fCoordinates.M()", "xmin":50, "xmax":150, "bin_num": 25},\
+##{"var_name":"genbosons_p4.fCoordinates.M()*(genbosons_id==25)", "xmin":50, "xmax":150, "bin_num": 25},\
+#{"var_name":"genbosons_p4.fCoordinates.Pt()*(genbosons_id==25)", "xmin":25, "xmax":1000, "bin_num": 25},\
+##{"var_name":"ak4pfjets_p4[0].fCoordinates.Pt()", "xmin":25, "xmax":1000, "bin_num": 25},\
+##{"var_name":"genqs_p4[0].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
+##{"var_name":"genqs_p4[1].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
+##{"var_name":"genqs_p4[2].fCoordinates.Pt()", "xmin":1, "xmax":1000, "bin_num": 25},\
 {"var_name":"new_mct", "xmin":0, "xmax":500, "bin_num": 25},\
 {"var_name":"new_met", "xmin":0, "xmax":500, "bin_num": 25},\
 {"var_name":"new_mt", "xmin":0, "xmax":500, "bin_num": 25},\
-{"var_name":"new_mbb", "xmin":0, "xmax":500, "bin_num": 50},\
+{"var_name":"new_mbb", "xmin":0, "xmax":500, "bin_num": 25},\
+#{"var_name":"MT2W", "xmin":20, "xmax":600, "bin_num": 20},\
+#{"var_name":"Mlb_closestb", "xmin":10, "xmax":500, "bin_num": 20},\
+#{"var_name":"topness", "xmin":-10, "xmax":10, "bin_num": 20},\
+#{"var_name":"topnessMod", "xmin":-10, "xmax":10, "bin_num": 20},\
+#{"var_name":"mindphi_met_j1_j2", "xmin":0, "xmax":5, "bin_num": 20},\
+##{"var_name":"mbb*(ptbb>500)", "xmin":50, "xmax":200, "bin_num": 20},\
+#{"var_name":"ak4_htratiom", "xmin":0, "xmax":1, "bin_num": 20},\
+#
 {"var_name":"lep1_p4.fCoordinates.Pt()", "xmin":0, "xmax":500, "bin_num": 25},\
 {"var_name":"ak4pfjets_leadbtag_p4.fCoordinates.Pt()", "xmin":0, "xmax":500, "bin_num": 25},\
-#{"var_name":"triglep1", "xmin":0, "xmax":1.5, "bin_num": 25},\
-#{"var_name":"triglep2", "xmin":0, "xmax":1.5, "bin_num": 25},\
-#{"var_name":"(triglep1+triglep2-triglep1*triglep2)", "xmin":0, "xmax":1.5, "bin_num": 25},\
+#{"var_name":"ak4pfjets_p4.fCoordinates.Pt()*(ak4pfjets_CSV > 0.5426)", "xmin":10, "xmax":200, "bin_num": 20},\
+#{"var_name":"xgb_proba", "xmin":0, "xmax":1, "bin_num": 40},\
 ]
+
 
 #Common set-up 
 lumi = 35.9
+#plot_folder_name = "WH_Comparison_20180321_alljets/"
+#plot_folder_name = "WH_Comparison_20180315_1jet/"
+#plot_folder_name = "WH_Comparison_20180315_2jet/"
+
+#region_str = "SR2"
+#region_str = "xgb0p7"
 #region_str = "PSR3jet_met_200_mct250"
 #region_str = "PSR3jet_met_200_mct225"
 region_str = "CR2l"
 region_str = "CRMbb_inclusive"
 region_str = "CR0b_inclusive"
-plot_folder_name = "WH_CR_Distribution_20180719_"+region_str+"/"
+plot_folder_name = "WH_CR_Distribution_Check_Composition_20180502"+region_str+"/"
 
 sample_index_list = [6,7,8,9,10,11]
-#sample_index_list = [6,11]
-#sample_index_list = [6]
 MC_multi = 10
 #Cut-Conditions
 from selection_criteria import get_cut_dict, combine_cuts
 cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
 #Current Ordering of the cut-requirement: (Preselection)
+#current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+#"PassTauVeto", "ngoodjets","goodbtags", "m_bb", "event_met_pt", "mt"]
+#current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+#"PassTauVeto", "event_met_pt", "mt"]
+
+#current_condition_list = [cut_dict[item] for item in current_cut_list]
+#str_condition = combine_cuts(current_condition_list)
+#str_condition +="&& ngoodjets == 1"
+#str_condition +="&& ngoodjets == 2"
 str_condition = region_cut_dict[region_str]
 if "CR0b" in region_str:
     str_condition = str_condition.replace(cut_dict["mt"],"new_mt>50")
 elif "CRMbb" in region_str:
     str_condition = str_condition.replace(cut_dict["mctbb"],"new_mct>0")
-tmp_str_condition = str_condition
+elif "CR2l" in region_str:
+    str_condition = str_condition.replace(cut_dict["event_met_pt_high"],cut_dict["event_met_pt"])
 print(str_condition)
 #Plotting
 num_cores = 12
@@ -177,14 +212,10 @@ total_num = len(plot_dict_list)
 start_time = time.time()
 processes = []
 for plot_dict in plot_dict_list:
-    if "CR2l" in region_str and not("new_mbb" in plot_dict["var_name"]):
-        str_condition = "("+tmp_str_condition+")"+"&&"+cut_dict["m_bb"]
-    else:
-        str_condition = tmp_str_condition
     print(plot_dict)
     index = plot_dict_list.index(plot_dict)
     #plot_comparison(plot_dict["var_name"], plot_dict["xmin"], plot_dict["xmax"], plot_dict["bin_num"], lumi, MC_multi, sample_index_list, plot_folder_name)
-    p = mp.Process(target=plot_comparison, args=(plot_dict["var_name"], plot_dict["xmin"], plot_dict["xmax"], plot_dict["bin_num"], lumi, MC_multi, sample_index_list, plot_folder_name,str_condition,))
+    p = mp.Process(target=plot_comparison, args=(plot_dict["var_name"], plot_dict["xmin"], plot_dict["xmax"], plot_dict["bin_num"], lumi, MC_multi, sample_index_list, plot_folder_name,))
     processes.append(p)
     if (index+1)%num_cores == 0 or index+1 == total_num:            
         [x.start() for x in processes]

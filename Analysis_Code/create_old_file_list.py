@@ -3,8 +3,7 @@ import os
 '''Last Update 2018/05/02.'''
 def get_files():
     '''Get the path to the MC files.'''
-    #file_location = "../root_file_temp/Mia_20180223/"
-    file_location = "../root_file_temp/Sicong_20180605/"
+    file_location = "../root_file_temp/Mia_20180223/"
     MC_list = []
     
     #Standard, no skimmed, MC signal points
@@ -36,9 +35,8 @@ def get_files():
     #Cate #1
     name = "2l top"
     file_name_list = glob.glob(file_location+"ttbar_diLept*.root")
-    file_name_list += glob.glob(file_location+"t_tbarW_5f_powheg_pythia8*_2l.root")
-    file_name_list += glob.glob(file_location+"t_tW_5f_powheg_pythia8*_2l.root")
-    
+    file_name_list += glob.glob(file_location+"t_tbarW_5f_powheg_pythia8*noHadDecays.root")#???
+    file_name_list += glob.glob(file_location+"t_tW_5f_powheg_pythia8*noHadDecays.root")#???
     MC_list.append({"name":name,"file_name_list":file_name_list})
     #Cate #2/3
     name = "W+LF/W+HF"
@@ -52,10 +50,7 @@ def get_files():
     
     #Cate #5
     name = "1l top"
-    file_name_list = glob.glob(file_location+"t_tbarW_5f_powheg_pythia8*_1l.root")#???
-    file_name_list += glob.glob(file_location+"t_tW_5f_powheg_pythia8*_1l.root")#???
-    
-    file_name_list += glob.glob(file_location+"ttbar_singleLeptFrom*.root")
+    file_name_list = glob.glob(file_location+"ttbar_singleLeptFrom*.root")
     file_name_list += glob.glob(file_location+"t_tch_4f_powheg_pythia8*.root")
     file_name_list += glob.glob(file_location+"tbar_tch_4f_powheg_pythia8*.root")
     file_name_list += glob.glob(file_location+"t_sch*.root")
@@ -86,80 +81,7 @@ def get_files():
     file_name_list += glob.glob(file_location+"data_single_muon_Run2016*.root")
     MC_list.append({"name":name,"file_name_list":file_name_list})
     
-    file_location = "../root_file_temp/Mia_20180601/"
-    file_location = "../root_file_temp/Sicong_20180408/"
-    name = "ttbar_new"
-    file_name_list = glob.glob(file_location+"ttbar_skim*.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    file_location = "../root_file_temp/Mia_20180601/"
-    name = "(700, 1) test"
-    file_name_list = glob.glob(file_location+"TChiWH_700_1_test.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "(700, 100) test"
-    file_name_list = glob.glob(file_location+"TChiWH_700_100_test.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "(700, 150) test"
-    file_name_list = glob.glob(file_location+"TChiWH_700_150_test.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "(600, 1) test"
-    file_name_list = glob.glob(file_location+"TChiWH_600_1_test.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "(600, 100) test"
-    file_name_list = glob.glob(file_location+"TChiWH_600_100_test.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "(600, 150) test"
-    file_name_list = glob.glob(file_location+"TChiWH_600_150_test.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
     return MC_list
-def get_new_files():
-    '''Get the path to the MC files.'''
-    #file_location = "../root_file_temp/Mia_20180626/"
-    file_location = "../root_file_temp/Sicong_20180722/"
-    MC_list = []
-    
-    #Standard, no skimmed, MC signal points
-    name = "2l top" #0
-    file_name_list = glob.glob(file_location+"top_*_2l.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "1l top" #1
-    file_name_list = glob.glob(file_location+"top_*_1l.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "WJetsToLNu" #2
-    file_name_list = glob.glob(file_location+"WJetsToLNu_*.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "(850, 1)" #3
-    file_name_list = glob.glob(file_location+"TChiWH_850_1.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    name = "data" #4
-    file_name_list = glob.glob(file_location+"data_*.root")
-    MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    #name = "(850, 1) test"
-    #file_location = "/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/"
-    #file_name_list = glob.glob(file_location+"TChiWH_850_1_test.root")
-    #MC_list.append({"name":name,"file_name_list":file_name_list})
-    
-    return MC_list
-def get_scale_dict():
-    scale_dict = {}
-    scale_dict["top_ttbar"] = {"numEvtsout":153531390, "Xsect_pb":831.76}
-    scale_dict["top_tW_top"] = {"numEvtsout":7660001, "Xsect_pb":38.09}
-    scale_dict["top_tW_antitop"] = {"numEvtsout":7993682, "Xsect_pb":38.09}
-    scale_dict["WJetsToLNu"] = {"numEvtsout":4925829, "Xsect_pb":0.2043}
-    for prefix in scale_dict:
-        scale_dict[prefix]["scale1fb"] = 1.0*scale_dict[prefix]["Xsect_pb"]/scale_dict[prefix]["numEvtsout"]*1000. 
-    return scale_dict
-    
 def get_tmp_files():
     tmp_MC_list = [
     {"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]},

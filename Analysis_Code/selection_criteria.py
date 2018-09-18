@@ -65,57 +65,82 @@ def get_lep_selection_str():
     return lep1_tight, lep2_tight, lep1_veto, lep2_veto, ntight_lep_str, nveto_lep_str
     
     
-def get_cut_dict():
+def get_cut_dict(if_new_sample = False):
     '''The selection criteria is currently following:
     https://github.com/mialiu149/AnalysisLoopers2015/blob/master/sharedCode/WHSelection.cc
     '''
     lep1_tight, lep2_tight, lep1_veto, lep2_veto, ntight_lep_str, nveto_lep_str = get_lep_selection_str()
     cut_dict = {}
-    #cut_dict['passTrigger'] = "(HLT_SingleMu>0 || HLT_SingleEl>0)"
     cut_dict['passTrigger'] = "(HLT_SingleMu || HLT_SingleEl)"
-    #cut_dict['passOneLep'] = lep1_tight
-    #cut_dict['passLepSel'] = "!("+lep2_veto+"||"+lep2_tight+")"
-    #cut_dict['passTwoLep'] = lep1_tight+"&&"+lep2_tight
-    cut_dict['passOneLep'] = "lep1_tight == 1"
+    cut_dict['passOneLep'] = "lep1_tight"
     cut_dict['passLepSel'] = "!(lep2_veto||lep2_tight)"
-    cut_dict['passTwoLep'] = "lep1_tight && lep2_tight"
+    cut_dict['passTwoLep'] = "(lep2_veto||lep2_tight)"
 
-    cut_dict['PassTrackVeto'] = "PassTrackVeto == 1"
-    cut_dict['PassTauVeto'] = "PassTauVeto == 1"
-    cut_dict['inverted_PassTrackVeto'] = "PassTrackVeto == 0"
-    cut_dict['inverted_PassTauVeto'] = "PassTauVeto == 0"
+    cut_dict['PassTrackVeto'] = "PassTrackVeto"
+    cut_dict['PassTauVeto'] = "PassTauVeto"
+    cut_dict['inverted_PassTrackVeto'] = "!(PassTrackVeto)" 
+    cut_dict['inverted_PassTauVeto'] = "!(PassTauVeto)"
+    cut_dict['Hadronic_Tau'] = "!(PassTauVeto && PassTrackVeto)"
     
-    cut_dict['ngoodjets'] = "ngoodjets == 2"
-    cut_dict['3goodjets'] = "ngoodjets == 3"
-    cut_dict['4moregoodjets'] = "ngoodjets >= 4"
+    #if_new_sample = False #The new sample lower the pt cut to 25
+    if_new_vars = True #Use the variable that is renewed for fastsim...
+    if if_new_sample:
+        cut_dict['ngoodjets'] = "ngoodjets30 == 2"
+        cut_dict['3goodjets'] = "ngoodjets30 == 3"
+    else:
+        cut_dict['ngoodjets'] = "ngoodjets == 2"
+        cut_dict['3goodjets'] = "ngoodjets == 3"
+    cut_dict['4moregoodjets'] = "ngoodjets >= 4" #Remove if it is checked to be useless.
     cut_dict['2ormoregoodjets'] = "ngoodjets >= 2"
     
-    cut_dict['goodbtags'] = "nbtag_loose == 2 && nbtag_med >= 1"
+    cut_dict['goodbtags'] = "nbtag_loose >= 2 && nbtag_med >= 1"
     cut_dict['zerobtags'] = "nbtag_loose == 0" 
     
-    #cut_dict['m_bb'] =  "(mbb > 90 && mbb < 150)"
-    #cut_dict['inverted_m_bb'] =  "!(mbb > 90 && mbb < 150)"
-    cut_dict['m_bb'] =  "(new_mbb > 90 && new_mbb < 150)"
-    cut_dict['inverted_m_bb'] =  "!(new_mbb > 90 && new_mbb < 150)"
+    cut_dict['one_ak4jet'] = "ngoodjets30 <= 1"
+    cut_dict['one_ak8jet'] = "ak8GoodPFJets >= 1"
+    cut_dict['ak8jetpt600'] = "ak8pfjets_p4[0].Pt() >= 600"
+    cut_dict['ak8jetpt500'] = "ak8pfjets_p4[0].Pt() >= 500"
+    cut_dict['ak8jetpt400'] = "ak8pfjets_p4[0].Pt() >= 400"
+    cut_dict['ak8jetpt300'] = "ak8pfjets_p4[0].Pt() >= 300"
+    cut_dict['ak8jet_hbb'] = "ak8pfjets_deep_rawdisc_hbb[0] >= 0.5"
     
-#    cut_dict['event_met_pt'] =  "(pfmet > 125)"
-#    cut_dict['event_met_pt_med'] =  "(pfmet > 125 && pfmet <=200)"
-#    cut_dict['event_met_pt_high'] =  "(pfmet > 200)"
-    cut_dict['event_met_pt'] =  "(new_met > 125)"
-    cut_dict['event_met_pt_med'] =  "(new_met > 125 && new_met <=200)"
-    cut_dict['event_met_pt_high'] =  "(new_met > 200)"
+    cut_dict['2jet_recover'] = "!(ak8GoodPFJets >= 1 && ak8pfjets_deep_rawdisc_hbb[0] >= 0.5) && ngoodjets30 <= 2 && ngoodjets > 1"
+    cut_dict['2jet_recover_new'] = "!(ak8GoodPFJets >= 1 && ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0] >= 0.5) && ngoodjets30 <= 2 && ngoodjets > 1"
     
-    #cut_dict['mt'] =  "mt_met_lep > 150"
-    cut_dict['mt'] =  "new_mt > 150"
-    
-    #cut_dict['mctbb'] =  "mct > 170"
-    cut_dict['mctbb'] =  "new_mct > 170"
+    if if_new_vars:
+        cut_dict['m_bb'] =  "(new_mbb > 90 && new_mbb < 150)"
+        cut_dict['m_bb_csv_rank'] =  "(new_mbb_csv_rank > 90 && new_mbb_csv_rank < 150)"
+        cut_dict['inverted_m_bb'] =  "!(new_mbb > 90 && new_mbb < 150)"
+        cut_dict['event_met_pt'] =  "new_met > 125"
+        cut_dict['event_met_pt_med'] =  "(new_met > 125 && new_met <=200)"
+        cut_dict['event_met_pt_high'] =  "(new_met > 200)"
+        cut_dict['mt'] =  "new_mt > 150"
+        cut_dict['mctbb'] =  "new_mct > 170"
+        cut_dict['mctbb_csv_rank'] =  "new_mct_csv_rank > 170"
+        cut_dict['mctbb_csv_rank225'] =  "new_mct_csv_rank > 225"
+    else:
+        cut_dict['m_bb'] =  "(mbb > 90 && mbb < 150)"
+        cut_dict['inverted_m_bb'] =  "!(mbb > 90 && mbb < 150)"
+        cut_dict['event_met_pt'] =  "(pfmet > 125)"
+        cut_dict['event_met_pt_med'] =  "(pfmet > 125 && pfmet <=200)"
+        cut_dict['event_met_pt_high'] =  "(pfmet > 200)"
+        cut_dict['mt'] =  "mt_met_lep > 150"
+        cut_dict['mctbb'] =  "mct > 170"
+
+    cut_dict["2vars"] = "ak4_htratiom < 0.3 && mindphi_met_j1_j2 > 1"
     
     #Current Ordering of the cut-requirement: (Preselection)
     current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
      "PassTauVeto", "ngoodjets", "goodbtags", "m_bb", "mctbb", "event_met_pt", "mt"]
     
+    Pre_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+     "PassTauVeto",   "event_met_pt", "mt"]#"goodbtags","m_bb", "mctbb",
     region_cut_dict = {}
+    
+    Pre_condition_list = [cut_dict[item] for item in Pre_cut_list]
+    Pre_cut = combine_cuts(Pre_condition_list)
+    
+    region_cut_dict["Preselection"] = Pre_cut
     #Definition of Signal Region (SR1, SR2) and Control Region (CR2l, CR0b, CRMbb)
     SR1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "ngoodjets", "goodbtags", "m_bb", "mctbb", "event_met_pt_med", "mt"]
@@ -131,24 +156,25 @@ def get_cut_dict():
     region_cut_dict["SR2"] = SR2_cut
     
     #CR2l
-    CR2l_list_1 = ["passTrigger", "passOneLep", "passLepSel", "inverted_PassTrackVeto",\
-    "inverted_PassTauVeto", "ngoodjets", "goodbtags", "event_met_pt_high", "mt"]
+    CR2l_list_1 = ["passTrigger", "passOneLep", "passLepSel", "Hadronic_Tau",\
+    "ngoodjets", "goodbtags", "event_met_pt", "mt"]
     CR2l_condition_list_1 = [cut_dict[item] for item in CR2l_list_1]
     CR2l_cut_1 = combine_cuts(CR2l_condition_list_1)
-    
-    CR2l_list_2 = ["passTrigger", "passTwoLep", "PassTrackVeto",\
-    "PassTauVeto", "ngoodjets", "goodbtags", "event_met_pt_high", "mt"]
+
+    CR2l_list_2 = ["passTrigger", "passTwoLep", "ngoodjets", "goodbtags", "event_met_pt", "mt"]
     CR2l_condition_list_2 = [cut_dict[item] for item in CR2l_list_2]
     CR2l_cut_2 = combine_cuts(CR2l_condition_list_2)
     
     CR2l_cut = "("+CR2l_cut_1+")||("+CR2l_cut_2+")"
+    #region_cut_dict["CR2l"] = CR2l_cut
     region_cut_dict["CR2l"] = CR2l_cut
+    #region_cut_dict["CR2l_1"] = CR2l_cut_1
     
     #CR0b
     CR0b1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "ngoodjets", "zerobtags", "m_bb", "mctbb", "event_met_pt_med", "mt"]
     CR0b1_condition_list = [cut_dict[item] for item in CR0b1_list]
-    CR0b1_cut = combine_cuts(CR0b1_condition_list)   #str_condition = "("+str_condition+")*"+scale_str
+    CR0b1_cut = combine_cuts(CR0b1_condition_list)   
     
     CR0b2_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "ngoodjets", "zerobtags", "m_bb", "mctbb", "event_met_pt_high", "mt"]
@@ -163,7 +189,7 @@ def get_cut_dict():
     CRMbb1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "ngoodjets", "goodbtags", "inverted_m_bb", "mctbb", "event_met_pt_med", "mt"]
     CRMbb1_condition_list = [cut_dict[item] for item in CRMbb1_list]
-    CRMbb1_cut = combine_cuts(CRMbb1_condition_list)   #str_condition = "("+str_condition+")*"+scale_str
+    CRMbb1_cut = combine_cuts(CRMbb1_condition_list)   
     
     CRMbb2_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "ngoodjets", "goodbtags", "inverted_m_bb", "mctbb", "event_met_pt_high", "mt"]
@@ -174,6 +200,51 @@ def get_cut_dict():
     region_cut_dict["CRMbb2"] = CRMbb2_cut
     region_cut_dict["CRMbb_inclusive"] = "("+CRMbb1_cut+")||("+CRMbb2_cut+")"
     
+    #CR3j_2l
+    CR3j_2l_list_1 = ["passTrigger", "passOneLep", "passLepSel", "Hadronic_Tau",\
+    "3goodjets", "goodbtags", "event_met_pt", "mt"]
+    CR3j_2l_condition_list_1 = [cut_dict[item] for item in CR3j_2l_list_1]
+    CR3j_2l_cut_1 = combine_cuts(CR3j_2l_condition_list_1)
+
+    CR3j_2l_list_2 = ["passTrigger", "passTwoLep", "3goodjets", "goodbtags", "event_met_pt", "mt"]
+    CR3j_2l_condition_list_2 = [cut_dict[item] for item in CR3j_2l_list_2]
+    CR3j_2l_cut_2 = combine_cuts(CR3j_2l_condition_list_2)
+    
+    CR3j_2l_cut = "("+CR3j_2l_cut_1+")||("+CR3j_2l_cut_2+")"
+    #region_cut_dict["CR3j_2l"] = CR3j_2l_cut
+    region_cut_dict["CR3j_2l"] = CR3j_2l_cut
+    #region_cut_dict["CR3j_2l_1"] = CR3j_2l_cut_1
+    
+    #CR3j_0b
+    CR3j_0b1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "zerobtags", "m_bb", "mctbb", "event_met_pt_med", "mt"]
+    CR3j_0b1_condition_list = [cut_dict[item] for item in CR3j_0b1_list]
+    CR3j_0b1_cut = combine_cuts(CR3j_0b1_condition_list)   
+    
+    CR3j_0b2_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "zerobtags", "m_bb", "mctbb", "event_met_pt_high", "mt"]
+    CR3j_0b2_condition_list = [cut_dict[item] for item in CR3j_0b2_list]
+    CR3j_0b2_cut = combine_cuts(CR3j_0b2_condition_list)
+    
+    region_cut_dict["CR3j_0b1"] = CR3j_0b1_cut
+    region_cut_dict["CR3j_0b2"] = CR3j_0b2_cut
+    region_cut_dict["CR3j_0b_inclusive"] = "("+CR3j_0b1_cut+")||("+CR3j_0b2_cut+")"
+    
+    #CR3j_Mbb
+    CR3j_Mbb1_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "goodbtags", "inverted_m_bb", "mctbb", "event_met_pt_med", "mt"]
+    CR3j_Mbb1_condition_list = [cut_dict[item] for item in CR3j_Mbb1_list]
+    CR3j_Mbb1_cut = combine_cuts(CR3j_Mbb1_condition_list)   
+    
+    CR3j_Mbb2_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "goodbtags", "inverted_m_bb", "mctbb", "event_met_pt_high", "mt"]
+    CR3j_Mbb2_condition_list = [cut_dict[item] for item in CR3j_Mbb2_list]
+    CR3j_Mbb2_cut = combine_cuts(CR3j_Mbb2_condition_list)
+    
+    region_cut_dict["CR3j_Mbb1"] = CR3j_Mbb1_cut
+    region_cut_dict["CR3j_Mbb2"] = CR3j_Mbb2_cut
+    region_cut_dict["CR3j_Mbb_inclusive"] = "("+CR3j_Mbb1_cut+")||("+CR3j_Mbb2_cut+")"
+        
     #Proposed SR 
     PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "3goodjets", "goodbtags", "m_bb", "event_met_pt_high", "mt"]
@@ -184,7 +255,6 @@ def get_cut_dict():
     region_cut_dict["PSR3jet_met_200_mct225"] = PSR_cut + "&& new_mct > 225"
     region_cut_dict["PSR3jet_met_200_mct250"] = PSR_cut + "&& new_mct > 250"
     region_cut_dict["PSR3jet_met_200_mct275"] = PSR_cut + "&& new_mct > 275"
-#    region_cut_dict["PSR3jet_met_200_mct300"] = PSR_cut + "&& new_mct > 300"
     region_cut_dict["PSR3jet_met_200_mct225_xgb_0p4"] = PSR_cut + "&& new_mct > 225"+"&& xgb_proba>0.4"
     region_cut_dict["PSR3jet_met_200_mct225_xgb_0p2"] = PSR_cut + "&& new_mct > 225"+"&& xgb_proba>0.2"
     region_cut_dict["PSR3jet_met_200_mct200_xgb_0p4"] = PSR_cut + "&& new_mct > 200"+"&& xgb_proba>0.4"
@@ -192,19 +262,249 @@ def get_cut_dict():
         
     #Test even higher met...
     region_cut_dict["PSR3jet_met_225_mct225"] = PSR_cut + "&& new_met > 225 && new_mct > 225"
-    region_cut_dict["PSR3jet_met_225_mct225_2vars"] = region_cut_dict["PSR3jet_met_225_mct225"] + "&& ak4_htratiom < 0.3 && mindphi_met_j1_j2 > 1"
+    region_cut_dict["PSR3jet_met_225_mct225_2vars"] = region_cut_dict["PSR3jet_met_225_mct225"] + "&&"+ cut_dict["2vars"]
+    region_cut_dict["PSR3jet_met_200_mct225_2vars"] = region_cut_dict["PSR3jet_met_200_mct225"] + "&&"+ cut_dict["2vars"]
+    
+    #Test the mct included with the ISR:
+    
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "goodbtags", "m_bb_csv_rank", "event_met_pt", "mt"]
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+    region_cut_dict["PSR3jet_met_125_mct200_ISR"] = PSR_cut + "&& new_mct_csv_rank > 200"
+    region_cut_dict["PSR3jet_met_125_mct225_ISR"] = PSR_cut + "&& new_mct_csv_rank > 225"
+    region_cut_dict["PSR3jet_met_125_mct250_ISR"] = PSR_cut + "&& new_mct_csv_rank > 250"
+    region_cut_dict["PSR3jet_met_125_mct275_ISR"] = PSR_cut + "&& new_mct_csv_rank > 275"
+    
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "goodbtags", "m_bb_csv_rank", "event_met_pt_high", "mt"]
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+    region_cut_dict["PSR3jet_met_200_mct200_ISR"] = PSR_cut + "&& new_mct_csv_rank > 200"
+    region_cut_dict["PSR3jet_met_200_mct225_ISR"] = PSR_cut + "&& new_mct_csv_rank > 225"
+    region_cut_dict["PSR3jet_met_200_mct250_ISR"] = PSR_cut + "&& new_mct_csv_rank > 250"
+    region_cut_dict["PSR3jet_met_200_mct275_ISR"] = PSR_cut + "&& new_mct_csv_rank > 275"
+    region_cut_dict["PSR3jet_met_225_mct225_ISR"] = PSR_cut + "&& new_met > 225 && new_mct_csv_rank > 225"
+    region_cut_dict["PSR3jet_met_225_mct225_2vars_ISR"] = region_cut_dict["PSR3jet_met_225_mct225_ISR"] + "&&"+ cut_dict["2vars"]
 
     PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "3goodjets", "goodbtags", "m_bb", "event_met_pt", "mt"]
     PSR_condition_list = [cut_dict[item] for item in PSR_list]
     PSR_cut = combine_cuts(PSR_condition_list)
-#    region_cut_dict["PSR3jet_mct200"] = PSR_cut + "&& new_mct > 200"
-#    region_cut_dict["PSR3jet_mct225"] = PSR_cut + "&& new_mct > 225"
-#    region_cut_dict["PSR3jet_mct250"] = PSR_cut + "&& new_mct > 250"
     region_cut_dict["PSR3jet_mct275"] = PSR_cut + "&& new_mct > 275"
     region_cut_dict["PSR3jet_mct300"] = PSR_cut + "&& new_mct > 300"
-#    region_cut_dict["PSR3jet_mct350"] = PSR_cut + "&& new_mct > 350"
-   
+    
+    #Proposed SR 1 fat jet
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "one_ak4jet","one_ak8jet", "event_met_pt_high", "mt"]#"m_bb",
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+
+    region_cut_dict["PSR1jet_met_200_pt_300"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']
+    region_cut_dict["PSR1jet_met_200_pt_300_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_met_200_pt_300_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+    
+    region_cut_dict["PSR1jet_met_200_pt_400"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']
+    region_cut_dict["PSR1jet_met_200_pt_400_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_met_200_pt_400_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+    
+    region_cut_dict["PSR1jet_met_200_pt_500"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']
+    region_cut_dict["PSR1jet_met_200_pt_500_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_met_200_pt_500_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+    
+    region_cut_dict["PSR1jet_met_200_pt_600"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']
+    region_cut_dict["PSR1jet_met_200_pt_600_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_met_200_pt_600_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+ 
+
+    #Proposed Non-Orthogonal 1 fat jet region
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "one_ak8jet", "event_met_pt_high"]#"m_bb",#, "mt"
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+    
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_600"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_600_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_600_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+    
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_500"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_500_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_500_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+    
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_400"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_400_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.5"
+    region_cut_dict["PSR1jet_inclusive_met_200_pt_400_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfjets_deep_rawdisc_hbb[0]>0.9"
+    
+    #Proposed 2 jet recoverable region
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "2jet_recover", "goodbtags", "mt", "m_bb"]#, "mctbb", "event_met_pt_high"
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+    region_cut_dict["PSR1jet_recover_2jet"] = PSR_cut
+    region_cut_dict["PSR1jet_recover_2jet_met_200_mct170"] = PSR_cut + "&& new_mct > 170"+"&& new_met>200"
+    region_cut_dict["PSR1jet_recover_2jet_met_200_mct225"] = PSR_cut + "&& new_mct > 225"+"&& new_met>200"
+    region_cut_dict["PSR1jet_recover_2jet_met_250_mct170"] = PSR_cut + "&& new_mct > 170"+"&& new_met>250"
+    region_cut_dict["PSR1jet_recover_2jet_met_250_mct220"] = PSR_cut + "&& new_mct > 225"+"&& new_met>250"
+    
+    #Proposed Binned 2jet region
+    BSR2_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "ngoodjets", "goodbtags", "m_bb", "mctbb", "mt"]
+    BSR2_condition_list = [cut_dict[item] for item in BSR2_list]
+    BSR2_cut = combine_cuts(BSR2_condition_list)
+    
+    region_cut_dict["BSR2_MET_250"] = BSR2_cut+"&& new_met >= 250"
+    region_cut_dict["BSR2_MET_300"] = BSR2_cut+"&& new_met >= 300"
+    region_cut_dict["BSR2_MET_350"] = BSR2_cut+"&& new_met >= 350"
+    region_cut_dict["BSR2_MET_400"] = BSR2_cut+"&& new_met >= 400"
+    region_cut_dict["BSR2_MET_450"] = BSR2_cut+"&& new_met >= 450"
+    region_cut_dict["BSR2_MET_500"] = BSR2_cut+"&& new_met >= 500"
+    region_cut_dict["BSR2_MET_100_200"] = BSR2_cut+"&& new_met >= 100 && new_met < 200"
+    region_cut_dict["BSR2_MET_200_300"] = BSR2_cut+"&& new_met >= 200 && new_met < 300"
+    region_cut_dict["BSR2_MET_300_400"] = BSR2_cut+"&& new_met >= 300 && new_met < 400"
+    region_cut_dict["BSR2_MET_400_500"] = BSR2_cut+"&& new_met >= 400 && new_met < 500"
+    
+    region_cut_dict["BSR2_MET_100_300"] = BSR2_cut+"&& new_met >= 100 && new_met < 300"
+    region_cut_dict["BSR2_MET_200_400"] = BSR2_cut+"&& new_met >= 200 && new_met < 400"
+    region_cut_dict["BSR2_MET_300_500"] = BSR2_cut+"&& new_met >= 300 && new_met < 500"
+    
+    region_cut_dict["BSR2_MET_100_150"] = BSR2_cut+"&& new_met >= 100 && new_met < 150"
+    region_cut_dict["BSR2_MET_150_200"] = BSR2_cut+"&& new_met >= 150 && new_met < 200"
+    region_cut_dict["BSR2_MET_200_250"] = BSR2_cut+"&& new_met >= 200 && new_met < 250"
+    region_cut_dict["BSR2_MET_250_300"] = BSR2_cut+"&& new_met >= 250 && new_met < 300"
+    region_cut_dict["BSR2_MET_300_350"] = BSR2_cut+"&& new_met >= 300 && new_met < 350"
+    region_cut_dict["BSR2_MET_350_400"] = BSR2_cut+"&& new_met >= 350 && new_met < 400"
+    region_cut_dict["BSR2_MET_400_450"] = BSR2_cut+"&& new_met >= 400 && new_met < 450"
+    region_cut_dict["BSR2_MET_450_500"] = BSR2_cut+"&& new_met >= 450 && new_met < 500"
+        
+    #Proposed Binned 3jet region
+    BSR3_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "goodbtags", "m_bb_csv_rank","mctbb_csv_rank225", "mt"]
+    
+    BSR3_condition_list = [cut_dict[item] for item in BSR3_list]
+    BSR3_cut = combine_cuts(BSR3_condition_list)
+    
+    region_cut_dict["BSR3_MET_250"] = BSR3_cut+"&& new_met >= 250"
+    region_cut_dict["BSR3_MET_300"] = BSR3_cut+"&& new_met >= 300"
+    region_cut_dict["BSR3_MET_350"] = BSR3_cut+"&& new_met >= 350"
+    region_cut_dict["BSR3_MET_400"] = BSR3_cut+"&& new_met >= 400"
+    region_cut_dict["BSR3_MET_450"] = BSR3_cut+"&& new_met >= 450"
+    region_cut_dict["BSR3_MET_500"] = BSR3_cut+"&& new_met >= 500"
+    region_cut_dict["BSR3_MET_100_200"] = BSR3_cut+"&& new_met >= 100 && new_met < 200"
+    region_cut_dict["BSR3_MET_200_300"] = BSR3_cut+"&& new_met >= 200 && new_met < 300"
+    region_cut_dict["BSR3_MET_300_400"] = BSR3_cut+"&& new_met >= 300 && new_met < 400"
+    region_cut_dict["BSR3_MET_400_500"] = BSR3_cut+"&& new_met >= 400 && new_met < 500"
+    
+    region_cut_dict["BSR3_MET_100_300"] = BSR3_cut+"&& new_met >= 100 && new_met < 300"
+    region_cut_dict["BSR3_MET_200_400"] = BSR3_cut+"&& new_met >= 200 && new_met < 400"
+    region_cut_dict["BSR3_MET_300_500"] = BSR3_cut+"&& new_met >= 300 && new_met < 500"
+    
+    region_cut_dict["BSR3_MET_100_150"] = BSR3_cut+"&& new_met >= 100 && new_met < 150"
+    region_cut_dict["BSR3_MET_150_200"] = BSR3_cut+"&& new_met >= 150 && new_met < 200"
+    region_cut_dict["BSR3_MET_200_250"] = BSR3_cut+"&& new_met >= 200 && new_met < 250"
+    region_cut_dict["BSR3_MET_250_300"] = BSR3_cut+"&& new_met >= 250 && new_met < 300"
+    region_cut_dict["BSR3_MET_300_350"] = BSR3_cut+"&& new_met >= 300 && new_met < 350"
+    region_cut_dict["BSR3_MET_350_400"] = BSR3_cut+"&& new_met >= 350 && new_met < 400"
+    region_cut_dict["BSR3_MET_400_450"] = BSR3_cut+"&& new_met >= 400 && new_met < 450"
+    region_cut_dict["BSR3_MET_450_500"] = BSR3_cut+"&& new_met >= 450 && new_met < 500"
+    
+    #Proposed Binned 3jet region with 2var
+    BSR3_2vars_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "3goodjets", "goodbtags", "m_bb_csv_rank","mctbb_csv_rank225", "mt","2vars"]
+    
+    BSR3_2vars_condition_list = [cut_dict[item] for item in BSR3_2vars_list]
+    BSR3_2vars_cut = combine_cuts(BSR3_2vars_condition_list)
+    
+    region_cut_dict["BSR3_2vars_MET_250"] = BSR3_2vars_cut+"&& new_met >= 250"
+    region_cut_dict["BSR3_2vars_MET_300"] = BSR3_2vars_cut+"&& new_met >= 300"
+    region_cut_dict["BSR3_2vars_MET_350"] = BSR3_2vars_cut+"&& new_met >= 350"
+    region_cut_dict["BSR3_2vars_MET_400"] = BSR3_2vars_cut+"&& new_met >= 400"
+    region_cut_dict["BSR3_2vars_MET_450"] = BSR3_2vars_cut+"&& new_met >= 450"
+    region_cut_dict["BSR3_2vars_MET_500"] = BSR3_2vars_cut+"&& new_met >= 500"
+    region_cut_dict["BSR3_2vars_MET_100_200"] = BSR3_2vars_cut+"&& new_met >= 100 && new_met < 200"
+    region_cut_dict["BSR3_2vars_MET_200_300"] = BSR3_2vars_cut+"&& new_met >= 200 && new_met < 300"
+    region_cut_dict["BSR3_2vars_MET_300_400"] = BSR3_2vars_cut+"&& new_met >= 300 && new_met < 400"
+    region_cut_dict["BSR3_2vars_MET_400_500"] = BSR3_2vars_cut+"&& new_met >= 400 && new_met < 500"
+    
+    region_cut_dict["BSR3_2vars_MET_100_300"] = BSR3_2vars_cut+"&& new_met >= 100 && new_met < 300"
+    region_cut_dict["BSR3_2vars_MET_200_400"] = BSR3_2vars_cut+"&& new_met >= 200 && new_met < 400"
+    region_cut_dict["BSR3_2vars_MET_300_500"] = BSR3_2vars_cut+"&& new_met >= 300 && new_met < 500"
+    
+    region_cut_dict["BSR3_2vars_MET_100_150"] = BSR3_2vars_cut+"&& new_met >= 100 && new_met < 150"
+    region_cut_dict["BSR3_2vars_MET_150_200"] = BSR3_2vars_cut+"&& new_met >= 150 && new_met < 200"
+    region_cut_dict["BSR3_2vars_MET_200_250"] = BSR3_2vars_cut+"&& new_met >= 200 && new_met < 250"
+    region_cut_dict["BSR3_2vars_MET_250_300"] = BSR3_2vars_cut+"&& new_met >= 250 && new_met < 300"
+    region_cut_dict["BSR3_2vars_MET_300_350"] = BSR3_2vars_cut+"&& new_met >= 300 && new_met < 350"
+    region_cut_dict["BSR3_2vars_MET_350_400"] = BSR3_2vars_cut+"&& new_met >= 350 && new_met < 400"
+    region_cut_dict["BSR3_2vars_MET_400_450"] = BSR3_2vars_cut+"&& new_met >= 400 && new_met < 450"
+    region_cut_dict["BSR3_2vars_MET_450_500"] = BSR3_2vars_cut+"&& new_met >= 450 && new_met < 500"
+    #One 30GeV jet with multiple 20 GeV jets.#Need to change the b-tagging requirement.
+    
+    
+    #Proposed SR 1 fat jet
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "one_ak4jet","one_ak8jet", "event_met_pt_high", "mt"]#"m_bb",
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+
+    region_cut_dict["PSR1jet_new_met_200_pt_300"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']
+    region_cut_dict["PSR1jet_new_met_200_pt_300_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_met_200_pt_300_hbb0p7"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.7"
+    region_cut_dict["PSR1jet_new_met_200_pt_300_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt300']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+    
+    region_cut_dict["PSR1jet_new_met_200_pt_400"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']
+    region_cut_dict["PSR1jet_new_met_200_pt_400_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_met_200_pt_400_hbb0p7"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.7"
+    region_cut_dict["PSR1jet_new_met_200_pt_400_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+    
+    region_cut_dict["PSR1jet_new_met_200_pt_500"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']
+    region_cut_dict["PSR1jet_new_met_200_pt_500_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_met_200_pt_500_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+    
+    region_cut_dict["PSR1jet_new_met_200_pt_600"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']
+    region_cut_dict["PSR1jet_new_met_200_pt_600_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_met_200_pt_600_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+ 
+
+    #Proposed Non-Orthogonal 1 fat jet region
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "one_ak8jet", "event_met_pt_high"]#"m_bb",#, "mt"
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+    
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_600"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_600_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_600_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt600']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+    
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_500"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_500_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_500_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt500']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+    
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_400"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_400_hbb"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.5"
+    region_cut_dict["PSR1jet_new_inclusive_met_200_pt_400_hbb0p9"] = PSR_cut+"&&"+cut_dict['ak8jetpt400']+"&&ak8pfBoostedDoubleSecondaryVertexAK8BJetTags[0]>0.9"
+    
+    #Proposed 2 jet recoverable region
+    PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+    "PassTauVeto", "2jet_recover_new", "goodbtags", "mt", "m_bb"]#, "mctbb", "event_met_pt_high"
+    PSR_condition_list = [cut_dict[item] for item in PSR_list]
+    PSR_cut = combine_cuts(PSR_condition_list)
+    region_cut_dict["PSR1jet_new_recover_2jet"] = PSR_cut
+    region_cut_dict["PSR1jet_new_recover_2jet_met_200_mct170"] = PSR_cut + "&& new_mct > 170"+"&& new_met>200"
+    region_cut_dict["PSR1jet_new_recover_2jet_met_200_mct225"] = PSR_cut + "&& new_mct > 225"+"&& new_met>200"
+    region_cut_dict["PSR1jet_new_recover_2jet_met_250_mct170"] = PSR_cut + "&& new_mct > 170"+"&& new_met>250"
+    region_cut_dict["PSR1jet_new_recover_2jet_met_250_mct220"] = PSR_cut + "&& new_mct > 225"+"&& new_met>250"
+    
+    return cut_dict, current_cut_list, region_cut_dict
+
+def get_weight_formula():
+    '''Give the weight formula for different types of events.'''
+    weight_form = {}
+    weight_form["normal_sig"] = ""
+    weight_form["normal_bkg"] = ""
+    weight_form["xgb_sig"] = "weight"
+    weight_form["xgb_bkg"] = "weight"
+
+def save_for_later():
     #Proposed SR with 4 jets
     PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
     "PassTauVeto", "4moregoodjets", "goodbtags", "m_bb", "event_met_pt_high", "mt"]
@@ -252,31 +552,6 @@ def get_cut_dict():
     region_cut_dict["xgb0p984"] = xgb_cut + "&& xgb_proba > 0.984"+"&& xgb_proba <= 0.986"
     region_cut_dict["xgb0p986"] = xgb_cut + "&& xgb_proba > 0.986"+"&& xgb_proba <= 0.988"
     region_cut_dict["xgb0p988"] = xgb_cut + "&& xgb_proba > 0.988"+"&& xgb_proba <= 1.00"
-    
-    return cut_dict, current_cut_list, region_cut_dict
-
-def get_weight_formula():
-    '''Give the weight formula for different types of events.'''
-    weight_form = {}
-    weight_form["normal_sig"] = ""
-    weight_form["normal_bkg"] = ""
-    weight_form["xgb_sig"] = "weight"
-    weight_form["xgb_bkg"] = "weight"
-#if(abs(lep1_pdgid()) == 11){ 
-#    if(lep1_p4().pt()<500) triglep1_sf*= h_trig_el_sf->GetBinContent(h_trig_el_sf->FindBin(lep1_p4().pt()));		
-#    else  triglep1_sf*= h_trig_el_sf->GetBinContent(h_trig_el_sf->FindBin(400));
-#} // end of electron sf
-#else if(abs(lep1_pdgid()) == 13){ 
-#    if(abs(lep1_p4().eta()) < 1.2) {
-#        if(lep1_p4().pt()<500) triglep1_sf*= h_trig_mu_sf_eb->GetBinContent(h_trig_mu_sf_eb->FindBin(lep1_p4().pt()));		
-#        else  triglep1_sf*= h_trig_mu_sf_eb->GetBinContent(h_trig_mu_sf_eb->FindBin(400));
-#    }
-#    else if(abs(lep1_p4().eta()) > 1.2) {
-#        if(lep1_p4().pt()<500) triglep1_sf*= h_trig_mu_sf_ee->GetBinContent(h_trig_mu_sf_ee->FindBin(lep1_p4().pt()));		
-#        else  triglep1_sf*= h_trig_mu_sf_ee->GetBinContent(h_trig_mu_sf_ee->FindBin(400));
-#    }
-#} //end of muon trigger sf
-    
 #BTAGWP, compared to ak4pfjets_CSV[i_jet]
 BTAGWP = 0.5426; #Loose btag working point
 mBTAGWP = 0.8484; #Medium btag working point

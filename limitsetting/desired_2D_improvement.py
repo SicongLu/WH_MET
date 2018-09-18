@@ -9,8 +9,7 @@ from create_file_list import getgrid
 grid_list = getgrid()
 
 def get_limits(region_name = "PSR3jet_met_225_mct225_0426"):
-    if region_name == "desired":
-        return {}
+    
     file_location = "/home/users/siconglu/Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/scan_"+region_name+"/log/"
     result_dict = {}
     
@@ -37,26 +36,18 @@ def get_limits(region_name = "PSR3jet_met_225_mct225_0426"):
         #print(tmp_dict)
         f_txt.close()
     return result_dict
-#region_name = "80_SR1_SR2_0621"       
-region_name = "150_BSR2_MET_100_200_BSR2_MET_200_300_BSR2_MET_300_400_BSR2_MET_400_0706"
+region_name = "test_04_13"       
 old_result_dict = get_limits(region_name)
 region_name = "PSR3jet_met_225_mct225_0426"
 region_name = "PSR3jet_met_225_mct225_2vars_ISR_0608"
-region_name = "150_SR1_SR2_PSR3jet_met_225_mct225_2vars_ISR_0621"
-region_name = "150_BSR2_MET_100_200_BSR2_MET_200_400_BSR2_MET_400_BSR3_MET_100_200_BSR3_MET_200_400_BSR3_MET_400_0706"
-#region_name = "desired"
 new_result_dict = get_limits(region_name )
+
 
 h_improvement = ROOT.TH2F('h_improvement','Improvement', int((700-0)/25.),0,700,int((350/25.)), 0,350)
 for point in grid_list: 
     bin_x = h_improvement.GetXaxis().FindBin(point[0])
     bin_y = h_improvement.GetYaxis().FindBin(point[1])
     
-    if region_name == "desired":
-        wanted_result = min(1.0,old_result_dict[str(point)]["Expected 50.0%"])
-        ratio = 100.0*(1-wanted_result/old_result_dict[str(point)]["Expected 50.0%"])
-        h_improvement.SetBinContent(bin_x, bin_y, ratio)
-        continue;
     ratio = 100.0*(1-new_result_dict[str(point)]["Expected 50.0%"]/old_result_dict[str(point)]["Expected 50.0%"])
     #print(bin_x, bin_y, ratio)
     h_improvement.SetBinContent(bin_x, bin_y, ratio)
@@ -96,21 +87,10 @@ full_path = ''
 file_name = "SR_improvements_"+region_name
 canvas.Print(full_path+file_name+'.png')
 
-from palette_schemes import get_ucsd_palette, get_colz_palette
-palette = get_ucsd_palette()
-color_table = get_colz_palette(palette["rgb_list"],palette["stop_list"], ncolors = 100)
-ROOT.gStyle.SetPalette(len(color_table),color_table)
-
 
 h_improvement.Draw("colz")
 canvas.Update()
 file_name = "SR_improvements_"+region_name+"_color"
-canvas.Print(full_path+file_name+'.png')
-
-h_improvement.GetZaxis().SetRangeUser(0.0, 100.0);
-h_improvement.Draw("colz")
-canvas.Update()
-file_name = "SR_improvements_100percent_"+region_name+"_color"
 canvas.Print(full_path+file_name+'.png')
 
 

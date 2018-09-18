@@ -8,6 +8,7 @@ def get_weight_str(file_name, entry_num):
     '''Calculate the relevant weights'''
     #print(c1mass, n1mass, nevents, entry_num)
     lumi = 35.9
+    return "1"
     if "TChiWH" in file_name:
         f_scanSys = ROOT.TFile.Open("/nfs-7/userdata/mliu/tupler_babies/merged/onelepbabymaker/moriond2017.v13/output/SMS_tchiwh.root","READ") 
         h_scanSys = f_scanSys.Get("h_counterSMS").Clone("h_scanSys");
@@ -46,7 +47,7 @@ def get_cutflow(file_name,  condition_list):
         myhist = ROOT.TH1F(myhist_name,myhist_name,bin_num,xmin,xmax);
         t.Draw(var_name+">>"+myhist_name,str_condition,"goff")
         resulted_event_num = myhist.Integral()
-        #print(str_condition)
+        print(str_condition)
         print(resulted_event_num)
         if i == 0:  cut_name = "no cut"
         else:  cut_name = condition_list[i-1]
@@ -154,26 +155,39 @@ def write_cutflow(summary_cutflow_dict, condition_list, name_list, name_str = ""
 #Basic Set-up
 from selection_criteria import get_cut_dict
 cut_dict, current_cut_list,region_cut_dict = get_cut_dict()
-current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
-"PassTauVeto", "ngoodjets", "goodbtags", "m_bb", "mctbb", "event_met_pt_high", "mt"]
-condition_list = [cut_dict[item] for item in current_cut_list]
-print(condition_list)
+#current_cut_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+#"PassTauVeto", "ngoodjets", "goodbtags", "m_bb", "mctbb", "event_met_pt_high", "mt"]
+#condition_list = [cut_dict[item] for item in current_cut_list]
+
+PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+"PassTauVeto", "3goodjets", "goodbtags", "m_bb", "event_met_pt_high", "mt"]
+PSR_list = ["passTrigger", "passOneLep", "passLepSel", "PassTrackVeto",\
+ "PassTauVeto", "one_ak4jet", "event_met_pt_high", 'ak8jetpt400',"ak8jet_hbb"]#"m_bb",#, "mt"
+PSR_list = current_cut_list
+condition_list = [cut_dict[item] for item in PSR_list]
+#condition_list.append("new_mct>225")
+#condition_list.append(cut_dict["2vars"])
+
+#print(condition_list)
 #Main function
-from create_file_list import get_files, getgrid, generate_scan_dict
+from create_file_list import get_files, getgrid, generate_scan_dict, get_new_files
 grid_list = generate_scan_dict()
-MC_list = get_files()
+#MC_list = get_files()
+MC_list = get_new_files()
 #new_location = "../root_file_temp/XGB_20180410/"
-new_location = "../root_file_temp/Sicong_20180408/"
+#new_location = "../root_file_temp/Sicong_20180408/"
+#new_location = "../root_file_temp/Sicong_20180605/"
+new_location = "../root_file_temp/Sicong_20180626/"
 #summary_cutflow_dict, name_list = get_summary_cutflow(condition_list, new_location, MC_list[0:6])#[0:6]
 #new_location = "/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/test_sample_with_feature/"
 tmp_MC_list = [{"name":"new (700,1)", "file_name_list":["/home/users/siconglu/Mia_WH_Analysis/WHAnalysis/onelepbabymaker/TChiWH_700_1_test.root"]}]
-#summary_cutflow_dict, name_list = get_summary_cutflow(condition_list, new_location, MC_list[0:7]+tmp_MC_list[0:1])#[0:6]
-#date = "0424"
-#write_cutflow(summary_cutflow_dict, condition_list, name_list, name_str = date)
+summary_cutflow_dict, name_list = get_summary_cutflow(condition_list, new_location, MC_list[0:4]+MC_list[0:0]+tmp_MC_list[0:0])#[0:6]
+date = "0703"
+write_cutflow(summary_cutflow_dict, condition_list, name_list, name_str = date)
 
-n_minus_1_dict, name_list = get_n_minus_1(condition_list, new_location, MC_list[0:]+tmp_MC_list[0:0])
-date = "n_minus_1_0424"
-write_cutflow(n_minus_1_dict, condition_list, name_list, name_str = date)
+#n_minus_1_dict, name_list = get_n_minus_1(condition_list, new_location, MC_list[0:7]+MC_list[12:]+tmp_MC_list[0:0])
+#date = "n_minus_1_0604"
+#write_cutflow(n_minus_1_dict, condition_list, name_list, name_str = date)
 
 
 

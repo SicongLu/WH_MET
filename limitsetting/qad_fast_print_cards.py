@@ -17,7 +17,7 @@ def printcard(masspoint,masspointinfo,binN,backgrounds,errors, bin_name ,carddir
     card.write("------------\n")
     card.write("# observations\n")
     card.write("bin        "+bin_name+'\n')
-    card.write("observation  " + str(8)+'\n')
+    card.write("observation  " +str(8)+'\n') # str(backgrounds['data'])
     card.write("#now we list all expected number of events\n")
     bintoprint = bin_name+' '
     card.write("bin "+7*bintoprint+'\n')
@@ -185,6 +185,10 @@ def str2yield(tmp_str):
     num_list = tmp_str.split(" +- ")
     num_yield = float(num_list[0])
     num_stats = float(num_list[1])
+    #Need to scale it by luminosity
+    num_yield = num_yield*(lumi/35.9)
+    num_stats = num_stats*(lumi/35.9)
+    
     return num_yield, num_stats
 def test_get_scan(yield_file, SR_list = ["SR1", "SR2"]):
     '''Directly read data from csv.'''
@@ -192,7 +196,7 @@ def test_get_scan(yield_file, SR_list = ["SR1", "SR2"]):
     errors = {'2l':[],'1l':[],'1ltop':[],'wzbb':[],'rare':[]}
     
     df = pd.read_csv(yield_file)
-    bkg_row_name = {"2l":"2l top", "1ltop":"1l top", "1l":"W+LF/W+HF", "wzbb":"WZ","rare":"rare"}
+    bkg_row_name = {"2l":"2l top", "1ltop":"1l top", "1l":"W+LF/W+HF", "wzbb":"WZ","rare":"rare"}#,"data":"data"
     bkg_list = bkg_row_name.keys()
     for SR in SR_list: #For each signal region
         for bkg in bkg_list: #For each background category
@@ -236,20 +240,23 @@ import sys
 if __name__ == "__main__":
    # specify selection here to get a set of backgrounds
    version='0'
-   new_cate = sys.argv[1]
-   date = sys.argv[2]
-   #new_cate = "PSR3jet_met_200_mct225"
-   #new_cate = "PSR3jet_met_200_mct250"
-   #new_cate = "PSR3jet_met_200_mct275"
-   if new_cate != "original":
-       SR_list = ["SR1", "SR2",new_cate]#,"PSR3jet_met_200_mct250"
-   else:
-       SR_list = ["SR1", "SR2"]
-   #SR_list = ["SR1", "SR2"]#,"PSR3jet_met_200_mct250"
+   lumi_str = sys.argv[1]
+   date_str = sys.argv[2]
+   SR_list = sys.argv[3:]
+   
+   global lumi
+   lumi = float(lumi_str.replace("p","."))
+   new_cate_str = lumi_str
+   for SR in SR_list:
+       new_cate_str+="_"+SR
+   print(lumi, date_str, SR_list)
+   print(new_cate_str)
+   
    zbins = len(SR_list)
    selection=""
-   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_"+new_cate+"_"+date+"/"#%version#_3jets
+   carddir = "../../Run_Directory/CMSSW_8_1_0/src/WH_MET_limitsetting/cards_"+new_cate_str+"_"+date_str+"/"#%version#_3jets
    yield_file = "../Analysis_Code/table_of_yield_04_12_sub.csv"
+   yield_file = "../Analysis_Code/table_of_yield_07_06_MET_binning.csv"
    #yield_file = "../Analysis_Code/table_of_yield_04_26_SR_lumi_80fb.csv"
    scandicts, bkgs,err = test_get_scan(yield_file, SR_list = SR_list)
  
@@ -274,4 +281,3 @@ if __name__ == "__main__":
        print zbin
        for k,kinfo in scandicts[zbin-1].items():
            card = printcard(k,kinfo,zbin,bkgs,err,SR_list[zbin-1],carddir)
-   
